@@ -6,7 +6,7 @@
     <check class="org.scalastyle.file.HeaderMatchesChecker" level="error" enabled="true">
         <parameters>
             <parameter name="regex">true</parameter>
-            <parameter name="header"><![CDATA[/\*\*\s+Package\(s\)\s+:\s+[a-z.]+\n\s+\*\s+Description\s+:\s+.*\n]]></parameter>
+            <!--<parameter name="header"><![CDATA[/\*\*\s+Package\(s\)\s+:\s+[a-z.]+\n\s+\*\s+Description\s+:\s+.*\n]]></parameter>-->
         </parameters>
     </check>
     <check class="org.scalastyle.scalariform.SpacesAfterPlusChecker" level="error" enabled="true"></check>
