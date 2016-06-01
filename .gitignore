@@ -1,6 +1,8 @@
 # Scala-IDE specific
 /wordStorm/project/
-/wordStorm/target
+/wordStorm/target/
+/dataScavenger/project/
+/dataScavenger/target/
 /project/project/
 /project/target/
 /target/

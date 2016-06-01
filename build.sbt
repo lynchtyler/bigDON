@@ -21,5 +21,12 @@ lazy val wordStorm = (project in file ("wordStorm"))
   .settings(commonSettings: _*)
   .settings(
     name := "wordStorm",
-    version := "0.1.0"
+    version := "0.0.0"
+  )
+
+lazy val dataScavenger = (project in file ("dataScavenger"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "dataScavenger",
+    version := "0.0.0"
   )
