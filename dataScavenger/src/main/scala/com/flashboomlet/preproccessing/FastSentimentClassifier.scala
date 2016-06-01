@@ -3,7 +3,9 @@ package com.flashboomlet.preproccessing
 import com.fasterxml.jackson.databind.ObjectMapper
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scalaj.http.Http
+
 
 /** Object containing REST call to analyze sentiment of text */
 object FastSentimentClassifier {

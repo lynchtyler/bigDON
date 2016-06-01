@@ -15,12 +15,14 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.8",
   resolvers ++= Seq(
     "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-    "Typesafe Releases" at "https://repo.typesafe.com/typesafe/maven-releases/"
+    "Typesafe Releases" at "https://repo.typesafe.com/typesafe/maven-releases/",
+    "Maven central" at "http://repo1.maven.org/maven2/"
   ),
   libraryDependencies ++= Seq(
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4",
     "org.scalaz" %% "scalaz-core" % "7.2.2",
     "org.scalaj" %% "scalaj-http" % "2.3.0",
+    "com.danielasfregola" %% "twitter4s" % "0.1",
     "com.typesafe" % "config" % "1.3.0"
   )
 )

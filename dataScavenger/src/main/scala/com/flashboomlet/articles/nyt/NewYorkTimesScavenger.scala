@@ -188,9 +188,9 @@ object NewYorkTimesScavenger {
   /**
     * Constructor for the NewYorkTimeScavenger.
     *
-    * This method extracts all relevant information from the corresponding configuration file.
+    * This method extracts all relevant information from the corresponding com.flashboomlet.twitter.configuration file.
     *
-    * @note There must be a valid `newyorktimes.conf` configuration file in the resources directory.
+    * @note There must be a valid `newyorktimes.conf` com.flashboomlet.twitter.configuration file in the resources directory.
     * @return A new instance of a NewYorkTimesScavenger.
     */
   def apply()(implicit mapper: ObjectMapper): NewYorkTimesScavenger = {
