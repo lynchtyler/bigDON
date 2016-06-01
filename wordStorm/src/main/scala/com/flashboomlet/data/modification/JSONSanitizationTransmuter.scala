@@ -1,8 +1,9 @@
-package data.modification
+package com.flashboomlet.data.modification
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import data.DataSource
-import data.sourceTypes.JSON
+import com.flashboomlet.data.DataSource
+import com.flashboomlet.data.sourceTypes.JSON
+import data.modification.DataSourceSanitizationTransmuter
 
 import scalaz.\/
 

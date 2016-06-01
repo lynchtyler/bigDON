@@ -1,7 +1,8 @@
 package data.modification
 
-import data.DataSource
-import data.sourceTypes.Source
+import com.flashboomlet.data.DataSource
+import com.flashboomlet.data.modification.DataSourceTransmuter
+import com.flashboomlet.data.sourceTypes.Source
 
 import scalaz.\/
 

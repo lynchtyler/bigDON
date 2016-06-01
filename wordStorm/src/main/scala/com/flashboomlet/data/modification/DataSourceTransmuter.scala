@@ -1,7 +1,7 @@
-package data.modification
+package com.flashboomlet.data.modification
 
-import data.DataSource
-import data.sourceTypes.Source
+import com.flashboomlet.data.DataSource
+import com.flashboomlet.data.sourceTypes.Source
 
 import scalaz.\/
 
@@ -24,7 +24,6 @@ trait DataSourceTransmuter[T <: Source, R <: Source] {
     * into a more easily dealt with [[Source]] format.
     *
     * @note Method must be overridden by a Transmuter extending this trait.
-    *
     * @param originalSource The [[DataSource]] to be transmuted
     * @return The [[DataSource]] resulting from the transmutation
     */
