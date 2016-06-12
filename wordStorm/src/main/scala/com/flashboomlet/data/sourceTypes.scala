@@ -1,9 +1,9 @@
-package data
+package com.flashboomlet.data
 
 import java.io.File
 
 /**
-  * Object containing type definitions used for data source handling.
+  * Object containing type definitions used for com.flashboomlet.data source handling.
   */
 object sourceTypes {
 
@@ -21,5 +21,8 @@ object sourceTypes {
 
   /** Type for a Text source file */
   type TXT = Source
+
+  /** Type for an RSS source file */
+  type RSS = Source
 
 }

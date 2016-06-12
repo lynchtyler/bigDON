@@ -1,10 +1,10 @@
-package data
+package com.flashboomlet.data
 
-import data.sourceTypes.Source
+import com.flashboomlet.data.sourceTypes.Source
 
 /**
   * Trait defining a Data source that may be in interacted with, transformed, or sanitized.
-  * Some example data sources include XML files, JSON files, and Text files.
+  * Some example com.flashboomlet.data sources include XML files, JSON files, and Text files.
   *
   * Classes extending this trait should define getLinguisticData in such a way that for this
   * particular [[DataSource]], the core text in which sentiment analysis will be tested against
@@ -20,7 +20,7 @@ trait DataSource[T <: Source] {
   /**
     * Gets the text inside of the [[Source]] file that is to be used in linguistic analyses.
     *
-    * @return Currently returns unit until a model for linguistic data is created.
+    * @return Currently returns unit until a model for linguistic com.flashboomlet.data is created.
     */
   def getLinguisticData: Unit
 }
