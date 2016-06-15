@@ -6,47 +6,38 @@ import scalaj.http.HttpRequest
 
 /**
   * Created by ttlynch on 6/13/16.
+  *
+  * Class that fetches chart data from Huffington Posts Pollster API
   */
 class PollsterScavenger(implicit val mapper: ObjectMapper) {
 
   /**
     * Goes and grabs a chart
     *
-    * @param query
-    * @return
+    * @param query a string for the search
+    * @return a sequence of days or data points
     */
-  def scavengeChart(query: String = "2016-general-election-trump-vs-clinton"): Unit = {
-    // Seq[Day] = {
+  def scavengeChart(
+    query: String = "2016-general-election-trump-vs-clinton"): Chart = {
     val BaseApiPath: String = "http://elections.huffingtonpost.com/pollster/api"
 
     val request: HttpRequest = Http(BaseApiPath + "/charts/" + query)
-    /*
-    mapper.readValue(request.asBytes.body, classOf[PollResponse])
-    .response.days.toSeq.map { (day: Day) =>
-      Day(
-        date = day.date,
-        estimates = getDatePoints(request)
-      )
-    }
-    */
+    val x = mapper.readValue(request.asBytes.body, classOf[Chart])
+    Chart(
+      id = x.id,
+      title = x.title,
+      slug = x.slug,
+      topic = x.topic,
+      state = x.state,
+      short_title = x.short_title,
+      election_date = x.election_date,
+      poll_count = x.poll_count,
+      last_updated = x.last_updated,
+      url = x.url,
+      estimates = x.estimates,
+      estimates_by_date = x.estimates_by_date
+    )
   }
-
-  /**
-    * Searches for and fetches all of the data points for a day
-    *
-    * @param request
-    * @return
-    */
-  def getDatePoints(request: HttpRequest): Seq[DataPoint] = {
-    mapper.readValue(request.asBytes.body, classOf[EstimateResponse])
-    .estimatesResponse.dataPoints.toSeq.map { (dataPoint: DataPoint) =>
-      DataPoint(
-        choice = dataPoint.choice,
-        value = dataPoint.value
-      )
-    }
-  }
-
 }
 
 /** Companion object with a constructor that retrieves configurations */
@@ -55,4 +46,3 @@ object PollsterScavenger {
     new PollsterScavenger()
   }
 }
-

@@ -9,10 +9,6 @@ import com.flashboomlet.polls.PollsterScavenger
 
 /** Entry point to the data scavenger program */
 object Driver {
-
-  final val count = 100
-  final val USALynch = "2413302566"
-
   /** Defines single global instance of JSON object mapper that can be used throughout. */
   implicit val objectMapper: ObjectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
       .enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT)
@@ -24,8 +20,8 @@ object Driver {
     val tweetScavenger: TweetScavenger = TweetScavenger()
 
     // fetch newYorkTimesScavenger.scavengeArticles(...) here! . . . or start a chron job
-    // tweetScavenger.searchNRecentTweets("#Trump", count)
-    // tweetScavenger.fetchUserTimelineTop100Tweets(USALynch.toLong, count)
+    // tweetScavenger.searchNRecentTweets("#Trump")
+    // tweetScavenger.fetchUserTimelineTop100Tweets(("2413302566").toLong) // @USALynch 's timeline
     // pollsterScavenger.scavengeChart()
   }
 }

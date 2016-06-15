@@ -2,40 +2,16 @@ package com.flashboomlet.polls
 
 import java.sql.Date
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import spray.http.DateTime
+case class PollResponse(response: Response)
 
 /**
-  * Case class for top level SearchMetaData.
+  * Case class wrapping the articles
   *
-  * @param response The actual metadata response
+  * @param chart The sequence of article "docs"
   */
-case class SearchMetaData(response: MetaData)
+case class Response(chart: Set[Chart])
 
-/**
-  * Case class for the meta data
-  *
-  * @param meta the wrapper
-  */
-@JsonIgnoreProperties(Array("days"))
-case class MetaData(meta: Meta)
-
-/**
-  * Case class for the meta data
-  *
-  * @param id
-  * @param title
-  * @param slug
-  * @param topic
-  * @param state
-  * @param short_title
-  * @param election_date
-  * @param poll_count
-  * @param last_updated
-  * @param url
-  */
-@JsonIgnoreProperties(Array("estimates"))
-case class Meta(
+case class Chart(
   id: Long,
   title: String,
   slug: String,
@@ -44,8 +20,10 @@ case class Meta(
   short_title: String,
   election_date: Date,
   poll_count: Long,
-  last_updated: DateTime,
-  url: String
+  last_updated: String,
+  url: String,
+  estimates: Array[Estimates],
+  estimates_by_date: Array[Point]
 )
 
 /**
@@ -70,42 +48,14 @@ case class Estimates (
 )
 
 /**
-  * Case class for article response model. Excludes meta data
-  *
-  * @param response Wraps the response
-  */
-@JsonIgnoreProperties(Array(
-  "id",
-  "title",
-  "slug",
-  "topic",
-  "state",
-  "short_title",
-  "election_date",
-  "poll_count",
-  "last_updated",
-  "url",
-  "estimates",
-  "estimates_by_date"))
-case class PollResponse(response: Response)
-
-/**
-  * Case class wrapping the Estimates By Date
-  *
-  * @param days The sequence of article "docs"
-  */
-@JsonIgnoreProperties(Array("meta"))
-case class Response(days: Set[Day])
-
-/**
   * Case class for the Estimates By Date's
   *
   * @param date
   * @param estimates
   */
-case class Day (
+case class Point (
   date: Date,
-  estimates: Seq[DataPoint]
+  estimates: List[DataPoint]
 )
 
 /**
@@ -118,18 +68,3 @@ case class DataPoint (
   choice: String,
   value: Float
 )
-
-/**
-  * Case class for article response model. Excludes meta data
-  *
-  * @param estimatesResponse Wraps the response
-  */
-case class EstimateResponse(estimatesResponse: EstimatesResponse)
-
-/**
-  * Case class wrapping the Estimates By Date
-  *
-  * @param dataPoints The sequence of article "docs"
-  */
-@JsonIgnoreProperties(Array("meta"))
-case class EstimatesResponse(dataPoints: Set[DataPoint])
