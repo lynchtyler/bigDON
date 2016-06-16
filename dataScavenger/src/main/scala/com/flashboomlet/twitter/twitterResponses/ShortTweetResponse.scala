@@ -1,9 +1,10 @@
-package com.flashboomlet.twitter.entities
+package com.flashboomlet.twitter.twitterResponses
 
 import java.util.Date
 
 import com.danielasfregola.twitter4s.entities.GeoPlace
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
 
 /**
   * Case class wrapping the tweets
@@ -37,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
   "withheld_in_countries",
   "withheld_scope",
   "metadata"))
-case class Response(shortTweets: Set[ShortTweet])
+case class Response(shortTweets: Set[ShortTweetResponse])
 
 /**
   * Case class of the tweet
@@ -48,7 +49,7 @@ case class Response(shortTweets: Set[ShortTweet])
   * @param coordinates the coordinates of where the tweet was tweeted
   * @param created_at the date of creation of the tweet
   * @param favorite_count the amount of favorites the tweet has gotten
-  * @param place the english location of where the tweet was tweeted
+  * @param place is an object that holds metadata on the location of where the tweet was tweeted
   * @param retweet_count the amount of retweets the tweet has gotten
   */
 @JsonIgnoreProperties(Array(
@@ -78,15 +79,15 @@ case class Response(shortTweets: Set[ShortTweet])
 "withheld_in_countries",
 "withheld_scope",
 "metadata"))
-case class ShortTweet(
-   id: Long,
-   text: String,
-   user: Option[ShortUser] = None,
-   coordinates: Seq[Seq[Seq[Double]]] = Seq.empty,
-   created_at: Date,
-   favorite_count: Int = 0,
-   place: Option[GeoPlace] = None,
-   retweet_count: Long = 0
+case class ShortTweetResponse(
+                             id: Long,
+                             text: String,
+                             user: Option[ShortUserResponse] = None,
+                             coordinates: Seq[Seq[Seq[Double]]] = Seq.empty,
+                             created_at: Date,
+                             favorite_count: Int = 0,
+                             place: Option[GeoPlace] = None,
+                             retweet_count: Long = 0
 )
 
 /**
@@ -143,7 +144,7 @@ case class ShortTweet(
   "withheld_in_countries",
   "withheld_scope"
 ))
-case class ShortUser(
+case class ShortUserResponse(
   followers_count: Int,
   friends_count: Int,
   id: Long,

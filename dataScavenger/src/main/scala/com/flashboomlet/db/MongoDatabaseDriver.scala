@@ -46,7 +46,7 @@ class MongoDatabaseDriver
     // create assessment in the database if it does not exist and retrieve id
     entities.foreach { (entity: Entity) =>
       entitiesCollection.find(
-        BSONDocument(EntityConstants.NameString -> entity.name)
+        BSONDocument(EntityConstants.NameString -> entity.choice)
       ).cursor[BSONDocument]().collect[List]().map { list =>
         if (list.nonEmpty) {
           list.head.get(GlobalConstants.IdString).get.asInstanceOf[BSONObjectID]

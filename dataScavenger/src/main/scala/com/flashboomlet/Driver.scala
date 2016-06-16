@@ -3,10 +3,10 @@ package com.flashboomlet
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.flashboomlet.articles.nyt.NewYorkTimesScavenger
-import com.flashboomlet.twitter.TweetScavenger
-import com.flashboomlet.polls.PollsterScavenger
 import com.flashboomlet.db.MongoDatabaseDriver
+import com.flashboomlet.scavenger.NewYorkTimesScavenger
+import com.flashboomlet.scavenger.PollsterScavenger
+import com.flashboomlet.scavenger.TweetScavenger
 
 /** Entry point to the data scavenger program */
 object Driver {
@@ -22,6 +22,7 @@ object Driver {
     val newYorkTimesScavenger: NewYorkTimesScavenger = NewYorkTimesScavenger()
     val pollsterScavenger: PollsterScavenger = PollsterScavenger()
     val tweetScavenger: TweetScavenger = TweetScavenger()
+
 
     // fetch newYorkTimesScavenger.scavengeArticles(...) here! . . . or start a chron job
     // tweetScavenger.searchNRecentTweets("#Trump")

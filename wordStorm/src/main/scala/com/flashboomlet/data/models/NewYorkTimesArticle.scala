@@ -1,7 +1,7 @@
 package com.flashboomlet.data.models
 
 /**
-  * Created by trill on 6/14/16.
+  * Case class for the New York Times Article data model.
   */
 case class NewYorkTimesArticle(
   url: String,

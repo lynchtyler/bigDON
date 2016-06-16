@@ -11,6 +11,22 @@ case class PollResponse(response: Response)
   */
 case class Response(chart: Set[Chart])
 
+/**
+  * The Data Response by the Pollster API
+  *
+  * @param id id of the chart
+  * @param title title of the chart
+  * @param slug the search term
+  * @param topic the topic of the chart
+  * @param state the location that the chart responds to
+  * @param short_title the shortened title
+  * @param election_date the date of the election
+  * @param poll_count the amount of polls that the chart is derived from
+  * @param last_updated the date that the data was last updated
+  * @param url of the GUI version of the chart
+  * @param estimates the meta data for each data point estimate
+  * @param estimates_by_date the actual dates and the values corresponding to each
+  */
 case class Chart(
   id: Long,
   title: String,
@@ -29,13 +45,13 @@ case class Chart(
 /**
   * Case class for the Estimates data
   *
-  * @param choice
-  * @param value
-  * @param lead_confidence
-  * @param first_name
-  * @param last_name
-  * @param party
-  * @param incumbent
+  * @param choice the choice tag line ("Last Name", Other)
+  * @param value current value
+  * @param lead_confidence the confidence that the choice is leading
+  * @param first_name the choice first name ("Name", null)
+  * @param last_name the choice last name ("Name", null)
+  * @param party the party of the choice (Dem, Rep, N/A)
+  * @param incumbent boolean for whether the choice is the incumbent
   */
 case class Estimates (
   choice: String,

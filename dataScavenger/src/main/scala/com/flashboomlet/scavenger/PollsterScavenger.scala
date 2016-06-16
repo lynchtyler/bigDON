@@ -1,6 +1,8 @@
-package com.flashboomlet.polls
+package com.flashboomlet.scavenger
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.flashboomlet.polls.Chart
+
 import scalaj.http.Http
 import scalaj.http.HttpRequest
 
@@ -9,7 +11,7 @@ import scalaj.http.HttpRequest
   *
   * Class that fetches chart data from Huffington Posts Pollster API
   */
-class PollsterScavenger(implicit val mapper: ObjectMapper) {
+class PollsterScavenger(implicit val mapper: ObjectMapper) extends scavenger {
 
   /**
     * Goes and grabs a chart
@@ -38,6 +40,11 @@ class PollsterScavenger(implicit val mapper: ObjectMapper) {
       estimates_by_date = x.estimates_by_date
     )
   }
+
+  /**
+    * Scaffold for the scavengerTrait
+    */
+  def scavenge(): Unit = {}
 }
 
 /** Companion object with a constructor that retrieves configurations */
