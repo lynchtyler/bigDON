@@ -1,4 +1,4 @@
-package com.flashboomlet.polls
+package com.flashboomlet.scavenger.polls
 
 import java.sql.Date
 

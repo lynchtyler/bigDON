@@ -10,10 +10,10 @@ import com.danielasfregola.twitter4s.entities.enums.ResultType
 import com.danielasfregola.twitter4s.entities.enums.ResultType.ResultType
 import com.danielasfregola.twitter4s.http.unmarshalling.CustomSerializers
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.flashboomlet.scavenger.scavenger
-import com.flashboomlet.twitter.configuration.TwitterConfiguration
-import com.flashboomlet.twitter.twitterResponses.ShortTweetResponse
-import com.flashboomlet.twitter.twitterResponses.ShortUserResponse
+import com.flashboomlet.scavenger.Scavenger
+import com.flashboomlet.scavenger.twitter.configuration.TwitterConfiguration
+import com.flashboomlet.scavenger.twitter.twitterResponses.ShortTweetResponse
+import com.flashboomlet.scavenger.twitter.twitterResponses.ShortUserResponse
 import org.json4s.DefaultFormats
 import org.json4s.Formats
 import org.json4s.native.JsonMethods.parse
@@ -30,7 +30,7 @@ import scala.concurrent.Future
   * Implementation of the Twitter4s API which can be found as:
   *   https://github.com/DanielaSfregola/twitter4s
   */
-class TweetScavenger extends scavenger {
+class TweetScavenger extends Scavenger {
 
   final val count = 100
   final val comma = ","

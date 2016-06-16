@@ -1,4 +1,4 @@
-package com.flashboomlet.articles.nyt
+package com.flashboomlet.scavenger.articles.nyt
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
   * @param response The actual metadata response
   */
 @JsonIgnoreProperties(Array("copyright"))
-case class SearchMetaData(status: String, response: MetaData)
+case class SearchMetaData(status: String, response: MetaDatas)
 
 /**
   * Case class for the meta data
@@ -17,7 +17,7 @@ case class SearchMetaData(status: String, response: MetaData)
   * @param meta the wrapper
   */
 @JsonIgnoreProperties(Array("docs"))
-case class MetaData(meta: Meta)
+case class MetaDatas(meta: Meta)
 
 /**
   * Case class for the meta data
@@ -62,7 +62,7 @@ case class Response(docs: Set[Doc])
   */
 @JsonIgnoreProperties(Array(
   "abstract", "blog", "print_page", "multimedia", "news_desk", "type_of_material", "_id",
-  "slideshow_credits", "document_type"))
+  "slideshow_credits"))
 case class Doc(
   web_url: String,
   snippet: String,
@@ -74,6 +74,7 @@ case class Doc(
   keywords: Set[Keyword],
   pub_date: String,
   byline: ByLine,
+  document_type: String,
   word_count: Int
 )
 

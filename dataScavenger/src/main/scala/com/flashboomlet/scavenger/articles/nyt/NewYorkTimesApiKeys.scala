@@ -1,4 +1,4 @@
-package com.flashboomlet.articles.nyt
+package com.flashboomlet.scavenger.articles.nyt
 
 /**
   * Case class for wrapping all of the different New York Times api keys

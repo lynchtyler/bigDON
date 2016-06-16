@@ -1,4 +1,4 @@
-package com.flashboomlet.twitter.twitterResponses
+package com.flashboomlet.scavenger.twitter.twitterResponses
 
 import java.util.Date
 

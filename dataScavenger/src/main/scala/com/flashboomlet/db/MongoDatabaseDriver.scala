@@ -57,6 +57,15 @@ class MongoDatabaseDriver
     }
   }
 
+  def newYorkTimesArticleExists(url: String): Boolean = {
+    val future =  newYorkTimesArticlesCollection
+      .find(BSONDocument(NYTArticleConstants.UrlString -> url))
+      .cursor[BSONDocument]().collect[List]()
+      .map(list => if (list.nonEmpty) { true } else { false })
+
+    Await.result(future, Duration.Inf)
+  }
+
   /**
     * Retrieves the BSONObjectID of an entity that exists in the database
     *

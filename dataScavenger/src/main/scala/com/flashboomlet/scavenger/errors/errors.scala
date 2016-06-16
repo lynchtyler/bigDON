@@ -1,4 +1,4 @@
-package com.flashboomlet.articles.errors
+package com.flashboomlet.scavenger.errors
 
 /**
   * An error that occurs during searching

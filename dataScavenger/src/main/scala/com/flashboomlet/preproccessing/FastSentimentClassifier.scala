@@ -1,6 +1,7 @@
 package com.flashboomlet.preproccessing
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.flashboomlet.data.models.Sentiment
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,11 +20,9 @@ object FastSentimentClassifier {
     * @param mapper Object mapper to parse JSON response
     * @return Future sentiment Data
     */
-  def getSentiment(text: String)(implicit mapper: ObjectMapper): Future[SentimentData] = {
-    Future {
-      mapper.readValue(
-        Http(RequestLocation).postForm(Seq("txt" -> text)).asBytes.body,
-        classOf[SentimentAnalysis]).result
-    }
+  def getSentiment(text: String)(implicit mapper: ObjectMapper): Sentiment = {
+    mapper.readValue(
+      Http(RequestLocation).postForm(Seq("txt" -> text)).asBytes.body,
+      classOf[SentimentAnalysis]).result
   }
 }
