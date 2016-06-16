@@ -1,10 +1,17 @@
-package com.flashboomlet.articles.nyt
+package com.flashboomlet.scavenger.articles.nyt
 
 import java.util.Date
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.articles.errors.SearchError
+import com.flashboomlet.articles.nyt.ArticleResponse
+import com.flashboomlet.articles.nyt.ByLine
+import com.flashboomlet.articles.nyt.Doc
+import com.flashboomlet.articles.nyt.Keyword
+import com.flashboomlet.articles.nyt.NewYorkTimesApiKeys
+import com.flashboomlet.articles.nyt.SearchMetaData
 import com.flashboomlet.data.PrefetchArticle
+import com.flashboomlet.scavenger.scavenger
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
@@ -22,7 +29,8 @@ import scalaz.\/-
   *
   * @param apiKeys Wrapper for list of Api keys. Each endpoint needs its own apikey
   */
-class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: ObjectMapper) {
+class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: ObjectMapper)
+  extends scavenger {
 
   private[this] val BaseApiPath: String = "https://api.nytimes.com/svc/search/v2"
 
@@ -174,6 +182,11 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
   }
 
   private[this] def getString(field: String): String = Option(field).getOrElse("")
+
+  /**
+    * Scaffold for the scavengerTrait
+    */
+  def scavenge(): Unit = {}
 }
 
 /** Companion object with a constructor that retrieves configurations */

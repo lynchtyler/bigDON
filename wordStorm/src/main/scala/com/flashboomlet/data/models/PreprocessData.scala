@@ -1,7 +1,10 @@
 package com.flashboomlet.data.models
 
 /**
-  * Created by trill on 6/14/16.
+  * Case class for the Pre-process data model.
+  *
+  * @param sentiment the sentiment data model
+  * @param counts the counts data model
   */
 case class PreprocessData(
   sentiment: Sentiment,

@@ -1,6 +1,7 @@
-package com.flashboomlet.twitter
+package com.flashboomlet.scavenger.twitter
 
 import java.text.SimpleDateFormat
+
 import com.danielasfregola.twitter4s.TwitterClient
 import com.danielasfregola.twitter4s.entities.StatusSearch
 import com.danielasfregola.twitter4s.entities.Tweet
@@ -9,15 +10,17 @@ import com.danielasfregola.twitter4s.entities.enums.ResultType
 import com.danielasfregola.twitter4s.entities.enums.ResultType.ResultType
 import com.danielasfregola.twitter4s.http.unmarshalling.CustomSerializers
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.flashboomlet.scavenger.scavenger
 import com.flashboomlet.twitter.configuration.TwitterConfiguration
-import com.flashboomlet.twitter.entities.ShortTweet
-import com.flashboomlet.twitter.entities.ShortUser
+import com.flashboomlet.twitter.twitterResponses.ShortTweetResponse
+import com.flashboomlet.twitter.twitterResponses.ShortUserResponse
 import org.json4s.DefaultFormats
 import org.json4s.Formats
 import org.json4s.native.JsonMethods.parse
 import org.json4s.native.JsonMethods.pretty
 import org.json4s.native.JsonMethods.render
 import org.json4s.native.Serialization
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -27,7 +30,7 @@ import scala.concurrent.Future
   * Implementation of the Twitter4s API which can be found as:
   *   https://github.com/DanielaSfregola/twitter4s
   */
-class TweetScavenger {
+class TweetScavenger extends scavenger {
 
   final val count = 100
   final val comma = ","
@@ -51,7 +54,7 @@ class TweetScavenger {
   private def getUserTimelineFor(
     ID: Long,
     tweetCount: Integer = count,
-    maxID: Option[Long] = None): Future[List[ShortTweet]] =  {
+    maxID: Option[Long] = None): Future[Seq[ShortTweetResponse]] =  {
 
     client.getUserTimelineForUserId(
     user_id = ID,
@@ -78,7 +81,7 @@ class TweetScavenger {
     query: String,
     tweetCount: Long = count,
     results: ResultType = ResultType.Popular,
-    maxID: Option[Long] = None): Future[List[ShortTweet]] = {
+    maxID: Option[Long] = None): Future[Seq[ShortTweetResponse]] = {
 
     client.searchTweet(
       query = query,
@@ -100,8 +103,8 @@ class TweetScavenger {
           tweetCount-100,
           results,
           nextMaxId)
-        rest.map { x =>
-          cleanTweets ++ x
+        rest.map { search =>
+          cleanTweets ++ search
         }
         cleanTweets
       }
@@ -125,7 +128,7 @@ class TweetScavenger {
     query: String,
     tweetCount: Long = count,
     results: ResultType = ResultType.Popular,
-    sinceID: Option[Long] = None): Future[List[ShortTweet]] = {
+    sinceID: Option[Long] = None): Future[Seq[ShortTweetResponse]] = {
 
     client.searchTweet(
       query = query,
@@ -149,8 +152,8 @@ class TweetScavenger {
           count,
           results,
           nextSinceId)
-        rest.map { x =>
-          cleanTweets ++ x
+        rest.map { search =>
+          cleanTweets ++ search
         }
         cleanTweets
       }
@@ -164,25 +167,25 @@ class TweetScavenger {
     * @param tweets is a statusSearch object
     * @return is a list of shortened tweets
     */
-  private def toShortTweet(tweets: StatusSearch): List[ShortTweet] = {
-    tweets.statuses.map(x =>
-      ShortTweet(
-        id = x.id,
-        text = x.text,
-        user = x.user.map(z =>
-          ShortUser(
-            followers_count = z.followers_count,
-            friends_count = z.friends_count,
-            id = z.id,
-            name = z.name,
-            screen_name = z.screen_name
+  private def toShortTweet(tweets: StatusSearch): Seq[ShortTweetResponse] = {
+    tweets.statuses.map(tweet =>
+      ShortTweetResponse(
+        id = tweet.id,
+        text = tweet.text,
+        user = tweet.user.map(user =>
+          ShortUserResponse(
+            followers_count = user.followers_count,
+            friends_count = user.friends_count,
+            id = user.id,
+            name = user.name,
+            screen_name = user.screen_name
           )
         ),
-        coordinates = x.coordinates,
-        created_at = x.created_at,
-        favorite_count = x.favorite_count,
-        place = x.place,
-        retweet_count = x.retweet_count
+        coordinates = tweet.coordinates,
+        created_at = tweet.created_at,
+        favorite_count = tweet.favorite_count,
+        place = tweet.place,
+        retweet_count = tweet.retweet_count
       )
     )
   }
@@ -194,25 +197,25 @@ class TweetScavenger {
     * @param tweets is a seq of tweet objects
     * @return is a list of shortened tweets
     */
-  private def toShortTweet(tweets: Seq[Tweet]): List[ShortTweet] = {
-    tweets.map(x =>
-      ShortTweet(
-        id = x.id,
-        text = x.text,
-        user = x.user.map(z =>
-          ShortUser(
-            followers_count = z.followers_count,
-            friends_count = z.friends_count,
-            id = z.id,
-            name = z.name,
-            screen_name = z.screen_name
+  private def toShortTweet(tweets: Seq[Tweet]): Seq[ShortTweetResponse] = {
+    tweets.map(tweet =>
+      ShortTweetResponse(
+        id = tweet.id,
+        text = tweet.text,
+        user = tweet.user.map(user =>
+          ShortUserResponse(
+            followers_count = user.followers_count,
+            friends_count = user.friends_count,
+            id = user.id,
+            name = user.name,
+            screen_name = user.screen_name
           )
         ),
-        coordinates = x.coordinates,
-        created_at = x.created_at,
-        favorite_count = x.favorite_count,
-        place = x.place,
-        retweet_count = x.retweet_count
+        coordinates = tweet.coordinates,
+        created_at = tweet.created_at,
+        favorite_count = tweet.favorite_count,
+        place = tweet.place,
+        retweet_count = tweet.retweet_count
       )
     ).toList
   }
@@ -287,7 +290,7 @@ class TweetScavenger {
     */
   def searchNPopularTweets(
     query: String,
-    tweetCount: Int = count): Future[List[ShortTweet]] = {
+    tweetCount: Int = count): Future[Seq[ShortTweetResponse]] = {
     searchForNTweets(query, tweetCount)
   }
 
@@ -299,7 +302,7 @@ class TweetScavenger {
     */
   def searchNRecentTweets(
     query: String,
-    tweetCount: Int = count): Future[List[ShortTweet]] = {
+    tweetCount: Int = count): Future[Seq[ShortTweetResponse]] = {
     searchForNTweets(query, tweetCount, ResultType.Recent)
   }
 
@@ -309,7 +312,7 @@ class TweetScavenger {
     * @param sinceID is the ID of the last gathered tweet
     * @return A list of cleaned tweets from the given Query
     */
-  def searchSince(query: String, sinceID: Long): Future[List[ShortTweet]] = {
+  def searchSince(query: String, sinceID: Long): Future[Seq[ShortTweetResponse]] = {
     searchTweetsFrom(query, results = ResultType.Recent, sinceID = Some(sinceID))
   }
 
@@ -325,9 +328,14 @@ class TweetScavenger {
     */
   def fetchUserTimelineTop100Tweets(
     ID: Long,
-    tweetCount: Integer = count): Future[List[ShortTweet]] = {
+    tweetCount: Integer = count): Future[Seq[ShortTweetResponse]] = {
     getUserTimelineFor(ID: Long, tweetCount)
   }
+
+  /**
+    * Scaffold for the scavengerTrait
+    */
+  def scavenge(): Unit = {}
 }
 
 /** Companion object with a constructor that retrieves configurations */

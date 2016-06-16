@@ -1,7 +1,10 @@
 package com.flashboomlet.data.models
 
 /**
-  * Created by trill on 6/14/16.
+  * The case class for the sentiment data model.
+  *
+  * @param sentiment the sentiment of the data
+  * @param confidence the confidence of the sentiment
   */
 case class Sentiment(
   sentiment: String,
