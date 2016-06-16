@@ -14,7 +14,7 @@ trait EntityImplicits extends MongoConstants {
   implicit object EntityWriter extends BSONDocumentWriter[Entity] {
 
     override def write(entity: Entity): BSONDocument = BSONDocument(
-      EntityConstants.NameString -> BSONString(entity.choice)
+      EntityConstants.NameString -> BSONString(entity.name)
     )
   }
 

@@ -1,4 +1,4 @@
-package com.flashboomlet.scavenger
+package com.flashboomlet.scavenger.twitter
 
 import java.text.SimpleDateFormat
 
@@ -10,6 +10,7 @@ import com.danielasfregola.twitter4s.entities.enums.ResultType
 import com.danielasfregola.twitter4s.entities.enums.ResultType.ResultType
 import com.danielasfregola.twitter4s.http.unmarshalling.CustomSerializers
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.flashboomlet.scavenger.scavenger
 import com.flashboomlet.twitter.configuration.TwitterConfiguration
 import com.flashboomlet.twitter.twitterResponses.ShortTweetResponse
 import com.flashboomlet.twitter.twitterResponses.ShortUserResponse

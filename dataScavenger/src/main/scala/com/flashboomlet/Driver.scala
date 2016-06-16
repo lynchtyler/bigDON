@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.flashboomlet.db.MongoDatabaseDriver
-import com.flashboomlet.scavenger.NewYorkTimesScavenger
-import com.flashboomlet.scavenger.PollsterScavenger
-import com.flashboomlet.scavenger.TweetScavenger
+import com.flashboomlet.scavenger.articles.nyt.NewYorkTimesScavenger
+import com.flashboomlet.scavenger.polls.PollsterScavenger
+import com.flashboomlet.scavenger.twitter.TweetScavenger
 
 /** Entry point to the data scavenger program */
 object Driver {

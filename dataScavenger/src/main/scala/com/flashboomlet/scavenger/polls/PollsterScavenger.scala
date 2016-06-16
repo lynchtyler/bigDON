@@ -1,7 +1,8 @@
-package com.flashboomlet.scavenger
+package com.flashboomlet.scavenger.polls
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.polls.Chart
+import com.flashboomlet.scavenger.scavenger
 
 import scalaj.http.Http
 import scalaj.http.HttpRequest

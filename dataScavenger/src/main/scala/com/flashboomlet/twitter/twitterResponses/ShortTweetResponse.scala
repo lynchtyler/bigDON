@@ -79,15 +79,15 @@ case class Response(shortTweets: Set[ShortTweetResponse])
 "withheld_in_countries",
 "withheld_scope",
 "metadata"))
-case class ShortTweetResponse(
-                             id: Long,
-                             text: String,
-                             user: Option[ShortUserResponse] = None,
-                             coordinates: Seq[Seq[Seq[Double]]] = Seq.empty,
-                             created_at: Date,
-                             favorite_count: Int = 0,
-                             place: Option[GeoPlace] = None,
-                             retweet_count: Long = 0
+  case class ShortTweetResponse(
+  id: Long,
+  text: String,
+  user: Option[ShortUserResponse] = None,
+  coordinates: Seq[Seq[Seq[Double]]] = Seq.empty,
+  created_at: Date,
+  favorite_count: Int = 0,
+  place: Option[GeoPlace] = None,
+  retweet_count: Long = 0
 )
 
 /**

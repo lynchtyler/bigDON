@@ -1,4 +1,4 @@
-package com.flashboomlet.scavenger
+package com.flashboomlet.scavenger.articles.nyt
 
 import java.util.Date
 
@@ -11,6 +11,7 @@ import com.flashboomlet.articles.nyt.Keyword
 import com.flashboomlet.articles.nyt.NewYorkTimesApiKeys
 import com.flashboomlet.articles.nyt.SearchMetaData
 import com.flashboomlet.data.PrefetchArticle
+import com.flashboomlet.scavenger.scavenger
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
