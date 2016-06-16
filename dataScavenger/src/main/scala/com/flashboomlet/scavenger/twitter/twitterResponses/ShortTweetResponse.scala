@@ -5,6 +5,7 @@ import java.util.Date
 import com.danielasfregola.twitter4s.entities.GeoPlace
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
+// scalastyle:off multiple.string.literals
 
 /**
   * Case class wrapping the tweets
@@ -151,3 +152,6 @@ case class ShortUserResponse(
   name: String,
   screen_name: String
 )
+
+// scalastyle:on multiple.string.literals
+

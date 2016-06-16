@@ -8,6 +8,7 @@ import com.flashboomlet.scavenger.errors.SearchError
 import com.flashboomlet.data.PrefetchArticle
 import com.flashboomlet.scavenger.Scavenger
 import com.flashboomlet.data.models.Counts
+import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.NewYorkTimesArticle
 import com.flashboomlet.db.MongoDatabaseDriver
 import com.flashboomlet.data.models.MetaData
@@ -49,7 +50,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
   /**
     * Scaffold for the scavengerTrait
     */
-  def scavenge(): Unit = {
+  def scavenge(entity: Entity): Unit = {
    // entities foreach search terms foreach scavengeArticles(searchterms, today, today)
   }
 
@@ -244,8 +245,7 @@ object NewYorkTimesScavenger {
     * This method extracts all relevant information from the corresponding
     * com.flashboomlet.scavenger.twitter.configuration file.
     *
-    * @note There must be a valid `newyorktimes.conf` com.flashboomlet.scavenger.twitter.configuration file
-    *       in the resources directory.
+    * @note There must be a valid `newyorktimes.conf` file in the resources directory.
     * @return A new instance of a NewYorkTimesScavenger.
     */
   def apply()(implicit mapper: ObjectMapper, db: MongoDatabaseDriver): NewYorkTimesScavenger = {

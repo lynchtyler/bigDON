@@ -10,6 +10,7 @@ import com.danielasfregola.twitter4s.entities.enums.ResultType
 import com.danielasfregola.twitter4s.entities.enums.ResultType.ResultType
 import com.danielasfregola.twitter4s.http.unmarshalling.CustomSerializers
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.flashboomlet.data.models.Entity
 import com.flashboomlet.scavenger.Scavenger
 import com.flashboomlet.scavenger.twitter.configuration.TwitterConfiguration
 import com.flashboomlet.scavenger.twitter.twitterResponses.ShortTweetResponse
@@ -33,12 +34,23 @@ import scala.concurrent.Future
 class TweetScavenger extends Scavenger {
 
   final val count = 100
+
   final val comma = ","
+
   final val one = 1
+
   final val four = 4
+
   val twitterConfiguration = TwitterConfiguration()
+
   val client = new TwitterClient(twitterConfiguration.getConsumerToken,
     twitterConfiguration.getAccessToken)
+
+
+  /**
+    * Scaffold for the scavengerTrait
+    */
+  def scavenge(entity: Entity): Unit = {}
 
   /**
     * getUserTimelineFor is a general function to search the top 100 tweets of a sepcific users
@@ -331,11 +343,6 @@ class TweetScavenger extends Scavenger {
     tweetCount: Integer = count): Future[Seq[ShortTweetResponse]] = {
     getUserTimelineFor(ID: Long, tweetCount)
   }
-
-  /**
-    * Scaffold for the scavengerTrait
-    */
-  def scavenge(): Unit = {}
 }
 
 /** Companion object with a constructor that retrieves configurations */
