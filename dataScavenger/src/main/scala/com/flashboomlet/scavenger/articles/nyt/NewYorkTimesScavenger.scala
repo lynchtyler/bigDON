@@ -1,19 +1,22 @@
 package com.flashboomlet.scavenger.articles.nyt
 
+import java.net.URL
 import java.util.Date
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.flashboomlet.articles.errors.SearchError
-import com.flashboomlet.articles.nyt.ArticleResponse
-import com.flashboomlet.articles.nyt.ByLine
-import com.flashboomlet.articles.nyt.Doc
-import com.flashboomlet.articles.nyt.Keyword
-import com.flashboomlet.articles.nyt.NewYorkTimesApiKeys
-import com.flashboomlet.articles.nyt.SearchMetaData
+import com.flashboomlet.scavenger.errors.SearchError
 import com.flashboomlet.data.PrefetchArticle
-import com.flashboomlet.scavenger.scavenger
+import com.flashboomlet.scavenger.Scavenger
+import com.flashboomlet.data.models.Counts
+import com.flashboomlet.data.models.NewYorkTimesArticle
+import com.flashboomlet.db.MongoDatabaseDriver
+import com.flashboomlet.data.models.MetaData
+import com.flashboomlet.data.models.PreprocessData
+import com.flashboomlet.preproccessing.FastSentimentClassifier
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -29,8 +32,8 @@ import scalaz.\/-
   *
   * @param apiKeys Wrapper for list of Api keys. Each endpoint needs its own apikey
   */
-class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: ObjectMapper)
-  extends scavenger {
+class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: ObjectMapper,
+  implicit val db: MongoDatabaseDriver) extends Scavenger {
 
   private[this] val BaseApiPath: String = "https://api.nytimes.com/svc/search/v2"
 
@@ -39,6 +42,16 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
   private[this] val OKResponseString: String = "OK"
 
   private[this] val PolitenessDelay: Int = 2000
+
+  private[this] val TimeoutAllowed = 5000
+
+
+  /**
+    * Scaffold for the scavengerTrait
+    */
+  def scavenge(): Unit = {
+   // entities foreach search terms foreach scavengeArticles(searchterms, today, today)
+  }
 
   /**
     * Given the query parameters needed, this will fetch articles, analyze them, and store them
@@ -50,21 +63,49 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
     * @param endDate The ending date of articles to retrieve (YYYYMMDD). Defaults to beginning of
     *                time
     */
-  def scavengeArticles(query: String, beginDate: String = "", endDate: String = ""): Unit = {
+  private[this] def scavengeArticles(
+    query: String,
+    beginDate: String = "",
+    endDate: String = ""): Unit = {
 
     val parameters = Seq(
       ("q", query),
       ("begin_date", beginDate),
       ("end_date", endDate))
 
-    fetchArticleSearchQueryMetaData(parameters) match {
+    fetchArticleSearchQueryMetaDatas(parameters) match {
       case \/-(numPages) =>
         prefetchArticles(parameters, numPages).map { (articles: Seq[PrefetchArticle]) =>
-          articles.map { (article: PrefetchArticle) =>
+          articles.foreach { (article: PrefetchArticle) =>
             // Fetch article
-            // Parse article text (and maybe additional information)
-            // run sentiment
-            // insert into database
+            Try {
+              val htmlDoc: Document = Jsoup.parse(new URL(article.url), TimeoutAllowed)
+              val articleBody: String = htmlDoc.getElementsByClass("story-body-text").text()
+              val metaData: MetaData = MetaData(
+                fetchDate = new Date().toString,
+                publishDate = article.publishDate,
+                source = article.source,
+                searchTerm = query,
+                entityId = ""
+              )
+
+              val preprocessData: PreprocessData = PreprocessData(
+                sentiment = FastSentimentClassifier.getSentiment(articleBody),
+                counts = Counts(0,0,0,0,0)
+              )
+
+              val nytArticle = NewYorkTimesArticle(
+                url = article.url,
+                title = article.title,
+                author = article.author,
+                body = articleBody,
+                summaries = article.summaries,
+                keyPeople = article.keyPeople,
+                metaData = metaData,
+                preprocessData = preprocessData
+              )
+              // insert into database needs to be done
+            }.getOrElse(())
           }
         }
       case -\/(err) => () // we should add logging
@@ -104,23 +145,23 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
     * @return Error on the left if one exists, else, the number of pages of results for the valid
     *         query on the right.
     */
-  private[this] def fetchArticleSearchQueryMetaData(
+  private[this] def fetchArticleSearchQueryMetaDatas(
       queryParameters: Seq[(String, String)]): \/[Error, Int] = {
 
     val parameters: Seq[(String, String)] = ("api-key", apiKeys.articleSearch) +: queryParameters
 
     val request: HttpRequest = Http(BaseApiPath + "/articlesearch.json").params(parameters)
 
-    val metaData = mapper.readValue(
+    val metaDatas = mapper.readValue(
       request.param("fl", "_id").asBytes.body, classOf[SearchMetaData])
 
-    if (metaData.status == OKResponseString) { // we have a valid search
-      val numHits = metaData.response.meta.hits
+    if (metaDatas.status == OKResponseString) { // we have a valid search
+      val numHits = metaDatas.response.meta.hits
       val totalPages = (numHits / ItemsPerPage) + { if (numHits % ItemsPerPage == 0) 0 else 1 }
       \/-(totalPages)
     } else {
       -\/(new SearchError(
-        s"The requested search parameters returned an invalid status: ${metaData.status}"))
+        s"The requested search parameters returned an invalid status: ${metaDatas.status}"))
     }
   }
 
@@ -137,7 +178,11 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
       pageNum: Int): Seq[PrefetchArticle] = {
 
     mapper.readValue(request.param("page", s"$pageNum").asBytes.body, classOf[ArticleResponse])
-      .response.docs.toSeq.map{ (doc: Doc) =>
+      .response.docs.toSeq
+      .filter { (d: Doc) =>
+        (d.document_type.contains("blogpost") || d.document_type.contains("article")) &&
+        !db.newYorkTimesArticleExists(d.web_url) } // remove duplicates
+      .map { (doc: Doc) =>
         PrefetchArticle(
           url = doc.web_url,
           title = getString(doc.headline.main),
@@ -182,11 +227,6 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
   }
 
   private[this] def getString(field: String): String = Option(field).getOrElse("")
-
-  /**
-    * Scaffold for the scavengerTrait
-    */
-  def scavenge(): Unit = {}
 }
 
 /** Companion object with a constructor that retrieves configurations */
@@ -201,12 +241,15 @@ object NewYorkTimesScavenger {
   /**
     * Constructor for the NewYorkTimeScavenger.
     *
-    * This method extracts all relevant information from the corresponding com.flashboomlet.twitter.configuration file.
+    * This method extracts all relevant information from the corresponding
+    * com.flashboomlet.scavenger.twitter.configuration file.
     *
-    * @note There must be a valid `newyorktimes.conf` com.flashboomlet.twitter.configuration file in the resources directory.
+    * @note There must be a valid `newyorktimes.conf` com.flashboomlet.scavenger.twitter.configuration file
+    *       in the resources directory.
     * @return A new instance of a NewYorkTimesScavenger.
     */
-  def apply()(implicit mapper: ObjectMapper): NewYorkTimesScavenger = {
+  def apply()(implicit mapper: ObjectMapper, db: MongoDatabaseDriver): NewYorkTimesScavenger = {
+
     val config: Config = ConfigFactory.parseResources(ConfigurationFileName)
     new NewYorkTimesScavenger(
       NewYorkTimesApiKeys(

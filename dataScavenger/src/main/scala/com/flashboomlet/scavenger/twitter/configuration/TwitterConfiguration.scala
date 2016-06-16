@@ -1,4 +1,4 @@
-package com.flashboomlet.twitter.configuration
+package com.flashboomlet.scavenger.twitter.configuration
 
 import com.danielasfregola.twitter4s.entities.AccessToken
 import com.danielasfregola.twitter4s.entities.ConsumerToken

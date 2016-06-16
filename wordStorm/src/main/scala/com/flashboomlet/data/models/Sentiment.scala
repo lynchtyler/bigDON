@@ -1,7 +1,8 @@
 package com.flashboomlet.data.models
 
 /**
-  * The case class for the sentiment data model.
+  * Case class for the actual data being wrapped by the result in the fast sentiment classifier.
+  * Doubles as a DB model
   *
   * @param sentiment the sentiment of the data
   * @param confidence the confidence of the sentiment

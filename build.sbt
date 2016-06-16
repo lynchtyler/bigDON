@@ -22,6 +22,7 @@ lazy val commonSettings = Seq(
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4",
     "org.scalaz" %% "scalaz-core" % "7.2.2",
     "org.scalaj" %% "scalaj-http" % "2.3.0",
+    "org.jsoup" % "jsoup" % "1.9.2",
     "com.danielasfregola" %% "twitter4s" % "0.1",
     "com.typesafe" % "config" % "1.3.0",
     "org.reactivemongo" %% "reactivemongo" % "0.11.13",
