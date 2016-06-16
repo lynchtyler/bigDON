@@ -23,7 +23,11 @@ lazy val commonSettings = Seq(
     "org.scalaz" %% "scalaz-core" % "7.2.2",
     "org.scalaj" %% "scalaj-http" % "2.3.0",
     "com.danielasfregola" %% "twitter4s" % "0.1",
-    "com.typesafe" % "config" % "1.3.0"
+    "com.typesafe" % "config" % "1.3.0",
+    "org.reactivemongo" %% "reactivemongo" % "0.11.13",
+    "ch.qos.logback"  %  "logback-classic" % "1.1.3",
+    "org.slf4j" %  "slf4j-api" % "1.7.14",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
   )
 )
 
