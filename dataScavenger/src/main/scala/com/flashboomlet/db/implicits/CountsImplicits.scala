@@ -2,6 +2,7 @@ package com.flashboomlet.db.implicits
 
 import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.Counts
+import com.flashboomlet.db.MongoUtil
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
@@ -15,10 +16,10 @@ trait CountsImplicits extends MongoConstants {
 
     override def write(counts: Counts): BSONDocument = BSONDocument(
       CountsConstants.WordCountString -> BSONInteger(counts.wordCount),
-      CountsConstants.ParagraphCountString -> BSONInteger(counts.paragraphCount),
       CountsConstants.SentenceCountString -> BSONInteger(counts.sentenceCount),
       CountsConstants.TitleWordCountString -> BSONInteger(counts.titleWordCount),
-      CountsConstants.SearchTermCountString -> BSONInteger(counts.searchTermCount)
+      CountsConstants.SearchTermCountString -> BSONInteger(counts.searchTermCount),
+      CountsConstants.WordOccurrencesString -> MongoUtil.mapToBSONDocument(counts.wordOccurrences)
     )
   }
 
@@ -27,17 +28,18 @@ trait CountsImplicits extends MongoConstants {
 
     override def read(doc: BSONDocument): Counts = {
       val wordCount = doc.getAs[Int](CountsConstants.WordCountString).get
-      val paragraphCount = doc.getAs[Int](CountsConstants.ParagraphCountString).get
       val sentenceCount = doc.getAs[Int](CountsConstants.SentenceCountString).get
       val titleWordCount = doc.getAs[Int](CountsConstants.TitleWordCountString).get
       val searchTermCount = doc.getAs[Int](CountsConstants.SearchTermCountString).get
+      val wordOccurrences = doc.getAs[BSONDocument](CountsConstants.WordOccurrencesString).get
 
       Counts(
         wordCount = wordCount,
-        paragraphCount = paragraphCount,
-        sentenceCount = searchTermCount,
+        sentenceCount = sentenceCount,
         titleWordCount = titleWordCount,
-        searchTermCount = searchTermCount
+        searchTermCount = searchTermCount,
+        wordOccurrences = MongoUtil.bsonDocumentToMap(
+          wordOccurrences).asInstanceOf[Map[String, Int]]
       )
     }
   }

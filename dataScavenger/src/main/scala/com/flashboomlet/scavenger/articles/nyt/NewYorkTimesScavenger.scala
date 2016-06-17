@@ -92,7 +92,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
 
               val preprocessData: PreprocessData = PreprocessData(
                 sentiment = FastSentimentClassifier.getSentiment(articleBody),
-                counts = Counts(0,0,0,0,0)
+                counts = Counts(0,0,0,0,Map())
               )
 
               val nytArticle = NewYorkTimesArticle(
