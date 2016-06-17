@@ -121,9 +121,6 @@ trait MongoConstants {
     /* String constant for the `word_count` field in a MongoDB Counts document */
     final val WordCountString = "word_count"
 
-    /* String constant for the `paragraph_count` field in a MongoDB Counts document */
-    final val ParagraphCountString = "paragraph_count"
-
     /* String constant for the `sentence_count` field in a MongoDB Counts document */
     final val SentenceCountString = "sentence_count"
 
@@ -132,7 +129,10 @@ trait MongoConstants {
 
     /* String constant for the `search_term_count` field in a MongoDB Counts document */
     final val SearchTermCountString = "search_term_count"
-  }
+
+    /* String constant for the 'word_occurrences' field in a MongoDB Counts document */
+    final val WordOccurrencesString = "word_occurrences"
+}
 
   /**
     * String constants used across the entirity of the MongoDB database
