@@ -3,7 +3,10 @@ package com.flashboomlet
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.flashboomlet.data.EntityFactory
+import com.flashboomlet.data.models.Entity
 import com.flashboomlet.db.MongoDatabaseDriver
+import com.flashboomlet.scavenger.Scavenger
 import com.flashboomlet.scavenger.articles.nyt.NewYorkTimesScavenger
 import com.flashboomlet.scavenger.polls.PollsterScavenger
 import com.flashboomlet.scavenger.twitter.TweetScavenger
@@ -17,12 +20,19 @@ object Driver {
   /** Database driver to be used globally throughout. */
   implicit val databaseDriver: MongoDatabaseDriver = MongoDatabaseDriver()
 
+  /** Set of globally instantiated entities */
+  val entities: Set[Entity] = EntityFactory.loadEntities()
+
   /** Main entry point to the program */
   def main(args: Array[String]): Unit = {
-    val newYorkTimesScavenger: NewYorkTimesScavenger = NewYorkTimesScavenger()
-    val pollsterScavenger: PollsterScavenger = PollsterScavenger()
-    val tweetScavenger: TweetScavenger = TweetScavenger()
 
+    databaseDriver.populateEntities(entities)
+
+    val scavengers: Seq[Scavenger] = Seq(
+      NewYorkTimesScavenger(),
+      TweetScavenger(),
+      PollsterScavenger()
+    )
 
     // fetch newYorkTimesScavenger.scavengeArticles(...) here! . . . or start a chron job
     // newYorkTimesScavenger.scavengeArticles("trump","20160615", "20160616")

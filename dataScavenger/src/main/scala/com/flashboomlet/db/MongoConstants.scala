@@ -54,8 +54,17 @@ trait MongoConstants {
     */
   object EntityConstants {
 
-    /* String constant for the `name` field in a MongoDB Entity document */
-    final val NameString = "name"
+    /* String constant for the `first_name` field in a MongoDB Entity document */
+    final val FirstNameString = "first_name"
+
+    /* String constant for the `last_name` field in a MongoDB Entity document */
+    final val LastNameString = "last_name"
+
+    /* String constant for the `party` field in a MongoDB Entity document */
+    final val PartyString = "party"
+
+    /* String constant for the `search_terms` field in a MongoDB Entity document */
+    final val SearchTermsString = "search_terms"
   }
 
   /**

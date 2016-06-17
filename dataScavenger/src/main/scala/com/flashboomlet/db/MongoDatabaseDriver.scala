@@ -7,12 +7,15 @@ import com.typesafe.scalalogging.LazyLogging
 import reactivemongo.api.BSONSerializationPack.Writer
 import reactivemongo.api.MongoDriver
 import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.api.commands.UpdateWriteResult
+import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.Failure
 import scala.util.Success
 
@@ -37,26 +40,51 @@ class MongoDatabaseDriver
   val entitiesCollection: BSONCollection = db(EntitiesCollection)
 
   /**
-    * Populates all of the entities in the database. If their IDS are later needed, you should map
-    * then entities instead of foreach.
+    * Populates all of the entities in the database.
+    *
+    * If the entity already exists, differences are checked. If differences exist, the entity is
+    * updated.
     *
     * @param entities Entities to insert into the databse
     */
   def populateEntities(entities: Set[Entity]): Unit = {
-    // create assessment in the database if it does not exist and retrieve id
     entities.foreach { (entity: Entity) =>
       entitiesCollection.find(
-        BSONDocument(EntityConstants.NameString -> entity.name)
-      ).cursor[BSONDocument]().collect[List]().map { list =>
+        BSONDocument(EntityConstants.LastNameString -> entity.lastName)
+      ).cursor[Entity]().collect[List]().map { list =>
         if (list.nonEmpty) {
-          list.head.get(GlobalConstants.IdString).get.asInstanceOf[BSONObjectID]
+          if (!list.head.equals(entity)) {
+            logger.info("Updating entity: " + entity.lastName)
+            updateEntity(entity)
+          }
         } else {
+          logger.info("Creating entity: " + entity.lastName)
           insertAndRetrieveNewId(entity, entitiesCollection)
         }
       }
     }
   }
 
+  /**
+    * Updates an entity's search strings.
+    *
+    * @param entity Entity to update search strings for in the database
+    * @return update result
+    */
+  def updateEntity(entity: Entity): Future[UpdateWriteResult] = {
+    val selector = BSONDocument(EntityConstants.LastNameString -> entity.lastName)
+    val modifier = BSONDocument("$set" -> BSONDocument(
+      EntityConstants.SearchTermsString -> entity.searchTerms
+    ))
+    entitiesCollection.update(selector, modifier)
+  }
+
+  /**
+    * Determines if a new york times article with the provided URL exists in the database.
+    *
+    * @param url The URL to be assessed for uniqueness in the database
+    * @return true if the url exists in an article in the database, else false
+    */
   def newYorkTimesArticleExists(url: String): Boolean = {
     val future =  newYorkTimesArticlesCollection
       .find(BSONDocument(NYTArticleConstants.UrlString -> url))

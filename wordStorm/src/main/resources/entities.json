@@ -1,0 +1,20 @@
+{
+  "entities": [
+    {
+      "firstName":"Donald",
+      "lastName":"Trump",
+      "party":"Rep",
+      "searchTerms":[
+        "trump"
+      ]
+    },
+    {
+      "firstName":"Hillary",
+      "lastName":"Clinton",
+      "party":"Dem",
+      "searchTerms":[
+        "clinton"
+      ]
+    }
+  ]
+}

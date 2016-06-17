@@ -1,6 +1,7 @@
 package com.flashboomlet.scavenger.polls
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.flashboomlet.data.models.Entity
 import com.flashboomlet.scavenger.Scavenger
 
 import scalaj.http.Http
@@ -16,7 +17,7 @@ class PollsterScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
   /**
     * Scaffold for the scavengerTrait
     */
-  def scavenge(): Unit = {}
+  def scavenge(entity: Entity): Unit = {}
 
   /**
     * Goes and grabs a chart

@@ -2,6 +2,7 @@ package com.flashboomlet.db.implicits
 
 import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.Entity
+import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
@@ -14,7 +15,10 @@ trait EntityImplicits extends MongoConstants {
   implicit object EntityWriter extends BSONDocumentWriter[Entity] {
 
     override def write(entity: Entity): BSONDocument = BSONDocument(
-      EntityConstants.NameString -> BSONString(entity.name)
+      EntityConstants.FirstNameString -> BSONString(entity.firstName),
+      EntityConstants.LastNameString -> BSONString(entity.lastName),
+      EntityConstants.PartyString -> BSONString(entity.party),
+      EntityConstants.SearchTermsString -> BSONArray(entity.searchTerms)
     )
   }
 
@@ -22,9 +26,20 @@ trait EntityImplicits extends MongoConstants {
   implicit object EntityReader extends BSONDocumentReader[Entity] {
 
     override def read(doc: BSONDocument): Entity = {
-      val entityName = doc.getAs[String](EntityConstants.NameString).get
+      val firstName = doc.getAs[String](EntityConstants.FirstNameString).get
+      val lastName = doc.getAs[String](EntityConstants.LastNameString).get
+      val party = doc.getAs[String](EntityConstants.PartyString).get
+      val searchTerms = doc.getAs[Set[String]](EntityConstants.SearchTermsString) match {
+        case Some(st) => st
+        case None => Set[String]()
+      }
 
-      Entity(entityName)
+      Entity(
+        firstName = firstName,
+        lastName = lastName,
+        party = party,
+        searchTerms = searchTerms
+      )
     }
   }
 }
