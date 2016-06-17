@@ -2,19 +2,29 @@ package com.flashboomlet.scavenger.twitter
 
 import java.text.SimpleDateFormat
 
+<<<<<<< Updated upstream
+=======
+import com.flashboomlet.data.models.MetaData
+import com.flashboomlet.preproccessing.FastSentimentClassifier
+
+>>>>>>> Stashed changes
 import com.danielasfregola.twitter4s.TwitterClient
-import com.danielasfregola.twitter4s.entities.StatusSearch
 import com.danielasfregola.twitter4s.entities.Tweet
 import com.danielasfregola.twitter4s.entities.enums.Language
 import com.danielasfregola.twitter4s.entities.enums.ResultType
-import com.danielasfregola.twitter4s.entities.enums.ResultType.ResultType
 import com.danielasfregola.twitter4s.http.unmarshalling.CustomSerializers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.data.models.Entity
+<<<<<<< Updated upstream
+=======
+import com.flashboomlet.data.models.PreprocessData
+import com.flashboomlet.data.models.FinalTweet
+import com.flashboomlet.preproccessing.CountUtil.countContent
+import com.flashboomlet.preproccessing.DateUtil.getToday
+import com.flashboomlet.preproccessing.DateUtil.convertTwitterDate
+>>>>>>> Stashed changes
 import com.flashboomlet.scavenger.Scavenger
 import com.flashboomlet.scavenger.twitter.configuration.TwitterConfiguration
-import com.flashboomlet.scavenger.twitter.twitterResponses.ShortTweetResponse
-import com.flashboomlet.scavenger.twitter.twitterResponses.ShortUserResponse
 import org.json4s.DefaultFormats
 import org.json4s.Formats
 import org.json4s.native.JsonMethods.parse
@@ -31,7 +41,7 @@ import scala.concurrent.Future
   * Implementation of the Twitter4s API which can be found as:
   *   https://github.com/DanielaSfregola/twitter4s
   */
-class TweetScavenger extends Scavenger {
+class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
 
   final val count = 100
 
@@ -50,7 +60,81 @@ class TweetScavenger extends Scavenger {
   /**
     * Scaffold for the scavengerTrait
     */
+<<<<<<< Updated upstream
   def scavenge(entity: Entity): Unit = {}
+=======
+  def scavenge(entity: Entity): Unit = {
+    // get highest ID for a given search parameter from entity
+    val searchTerms = entity.searchTerms
+    val today = getToday()
+    searchTerms.map { query =>
+      // In the future Search using: searchTweetsFrom(query, sinceID)
+      searchTweetsFrom(query).map { tweets =>
+        tweets.foreach { tweet =>
+          val finalTweet = getFinalTweet(tweet, query, today)
+          // Insert into DB
+        }
+      }
+    }
+  }
+
+  /**
+    * Creates the metaData object for the tweet
+    *
+    * @param today today's date
+    * @param tweetDate the date of the tweet
+    * @param query the query that got the tweet
+    * @return a metaData object
+    */
+  private def getMetaData(
+    today: String,
+    tweetDate: Date,
+    query: String): MetaData = {
+
+      MetaData(
+        fetchDate = today,
+        publishDate = convertTwitterDate(tweetDate),
+        source = "Twiiter",
+        searchTerm = query,
+        entityId = "", // TODO
+        contributions = 0
+      )
+  }
+
+  /**
+    * Creates the finalTweet object for the tweet
+    *
+    * @param tweet the tweet to convert into a final object
+    * @param query the query that got the tweet
+    * @param today today's date
+    * @return a finalTweet object
+    */
+  private def getFinalTweet(
+    tweet: Tweet,
+    query: String,
+    today: String): FinalTweet = {
+
+    val sentiment = FastSentimentClassifier.getSentiment(tweet.text)
+    val counts = countContent("", tweet.text, query)
+    val preprocessData = PreprocessData(sentiment, counts)
+    val metaData = getMetaData(today, tweet.created_at, query)
+
+    FinalTweet(
+      tweetID = tweet.id,
+      content = tweet.text,
+      followersCount = tweet.user.get.followers_count,
+      friendsCount = tweet.user.get.friends_count,
+      userID = tweet.user.get.id,
+      name = tweet.user.get.name,
+      screenName = tweet.user.get.screen_name,
+      favoriteCount = tweet.favorite_count,
+      country = tweet.place.get.country,
+      retweetCount = tweet.retweet_count,
+      metaData: MetaData,
+      preprocessData: PreprocessData
+    )
+  }
+>>>>>>> Stashed changes
 
   /**
     * getUserTimelineFor is a general function to search the top 100 tweets of a sepcific users
@@ -66,11 +150,12 @@ class TweetScavenger extends Scavenger {
   private def getUserTimelineFor(
     ID: Long,
     tweetCount: Integer = count,
-    maxID: Option[Long] = None): Future[Seq[ShortTweetResponse]] =  {
+    maxID: Option[Long] = None): Future[Seq[Tweet]] =  {
 
     client.getUserTimelineForUserId(
     user_id = ID,
     count = tweetCount,
+<<<<<<< Updated upstream
     max_id = maxID).map { tweets =>
       toShortTweet(tweets)
     }
@@ -121,6 +206,9 @@ class TweetScavenger extends Scavenger {
         cleanTweets
       }
     }
+=======
+    max_id = maxID)
+>>>>>>> Stashed changes
   }
 
   /**
@@ -131,48 +219,27 @@ class TweetScavenger extends Scavenger {
     *   the latest tweet of the day.
     *
     * @param query has a 500 character limit.
-    * @param tweetCount has a default value of 100. For more use searchTweetHistory
-    * @param results you can either get ResultType.Mix/Popular/Recent. Default of Popular
     * @param sinceID you can get all tweets with an ID greater than X value.
     * @return A list of cleaned tweets from the given Query
     */
   private def searchTweetsFrom(
     query: String,
-    tweetCount: Long = count,
-    results: ResultType = ResultType.Popular,
-    sinceID: Option[Long] = None): Future[Seq[ShortTweetResponse]] = {
+    sinceID: Option[Long] = None): Future[Seq[Tweet]] = {
 
     client.searchTweet(
       query = query,
       count = count,
       include_entities = false,
-      result_type = results,
+      result_type = ResultType.Recent,
       language = Some(Language.English),
       since_id = sinceID
     ).map { tweets =>
-
-      val resultCount = queriedCount(tweets.search_metadata.toString)
-      val nextSinceId = extractNextSinceId(tweets.search_metadata.toString)
-      val cleanTweets = toShortTweet(tweets)
-
-      if (resultCount < 100)
-      {
-        cleanTweets
-      } else {
-        val rest = searchTweetsFrom(
-          query: String,
-          count,
-          results,
-          nextSinceId)
-        rest.map { search =>
-          cleanTweets ++ search
-        }
-        cleanTweets
-      }
+      tweets.statuses
     }
   }
 
   /**
+<<<<<<< Updated upstream
     * toShortTweet takes a list of tweets from the twitter API and cleans them up.
     *   It takes one list of a type and converts it to another.
     *
@@ -230,6 +297,24 @@ class TweetScavenger extends Scavenger {
         retweet_count = tweet.retweet_count
       )
     ).toList
+=======
+    * Get Recent Tweet Returns a single Tweet in the final Tweet Format
+ *
+    * @param query the query that you are searching on
+    * @return a single tweet in the Final Tweet Format
+    */
+  private def getRecentTweet(query: String): Future[FinalTweet] = {
+    val today = getToday()
+    client.searchTweet(
+      query = query,
+      count = 1,
+      include_entities = false,
+      result_type = ResultType.Recent,
+      language = Some(Language.English)
+    ).map { tweets =>
+      getFinalTweet(tweets.statuses.head, query, today)
+    }
+>>>>>>> Stashed changes
   }
 
   /**
@@ -294,6 +379,7 @@ class TweetScavenger extends Scavenger {
   private def toJson[T <: AnyRef](value: T): String =
     pretty(render(parse(Serialization.write(value))))
 
+<<<<<<< Updated upstream
   /**
     *
     * @param query has a 500 character limit.
@@ -343,6 +429,8 @@ class TweetScavenger extends Scavenger {
     tweetCount: Integer = count): Future[Seq[ShortTweetResponse]] = {
     getUserTimelineFor(ID: Long, tweetCount)
   }
+=======
+>>>>>>> Stashed changes
 }
 
 /** Companion object with a constructor that retrieves configurations */

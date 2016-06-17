@@ -2,9 +2,12 @@ package com.flashboomlet.db.implicits
 
 import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.MetaData
+import reactivemongo.api.commands.bson.BSONListIndexesImplicits.BSONIndexListReader
+import reactivemongo.bson.BSONDateTime
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
+import reactivemongo.bson.BSONInteger
 import reactivemongo.bson.BSONString
 
 /** Implicit readers and writers for theMEtaData model in MongoDB */
@@ -18,7 +21,8 @@ trait MetaDataImplicits extends MongoConstants {
       MetaDataConstants.PublishDateString -> BSONString(metaData.publishDate),
       MetaDataConstants.SourceString -> BSONString(metaData.source),
       MetaDataConstants.SearchTermString -> BSONString(metaData.searchTerm),
-      MetaDataConstants.EntityIdString -> BSONString(metaData.entityId)
+      MetaDataConstants.EntityIdString -> BSONString(metaData.entityId),
+      MetaDataConstants.ContributionsString -> BSONInteger(metaData.contributions)
     )
   }
 
@@ -31,13 +35,15 @@ trait MetaDataImplicits extends MongoConstants {
       val source = doc.getAs[String](MetaDataConstants.SourceString).get
       val searchTerm = doc.getAs[String](MetaDataConstants.SearchTermString).get
       val entityId = doc.getAs[String](MetaDataConstants.EntityIdString).get
+      val contributions = doc.getAs[Int](MetaDataConstants.ContributionsString).get
 
       MetaData(
         fetchDate = fetchDate,
         publishDate = publishDate,
         source = source,
         searchTerm = searchTerm,
-        entityId = entityId
+        entityId = entityId,
+        contributions = contributions
       )
     }
   }

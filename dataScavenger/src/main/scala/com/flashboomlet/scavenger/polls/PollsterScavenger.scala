@@ -17,7 +17,36 @@ class PollsterScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
   /**
     * Scaffold for the scavengerTrait
     */
+<<<<<<< Updated upstream
   def scavenge(entity: Entity): Unit = {}
+=======
+  def scavenge(entity: Entity): Unit = {
+    // Scavenge Chart
+    val chart = scavengeChart()
+    val today = getToday()
+    val estimates = chart.estimates_by_date
+    // Metadata
+    val metaData = MetaData(
+      fetchDate = today,
+      publishDate = normalizeDate(chart.last_updated),
+      source = "Pollster",
+      searchTerm = "",
+      entityId = "", // TODO
+      contributions = chart.poll_count.toInt
+    )
+    // Convert Chart Response to Chart Model
+    val finalChart = estimates.map { day =>
+      com.flashboomlet.data.models.Chart(
+        date = shortDateNormalize(day.date),
+        clinton = day.estimates.find(x => x.value == "clinton").get.value,
+        trump = day.estimates.find(x => x.value == "trump").get.value,
+        other = day.estimates.find(x => x.value == "other").get.value,
+        undecided = day.estimates.find(x => x.value == "undecided").get.value,
+        metaData = metaData
+      )
+    }.toList
+  }
+>>>>>>> Stashed changes
 
   /**
     * Goes and grabs a chart
