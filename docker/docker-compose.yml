@@ -3,7 +3,13 @@ version: '2'
 services:
   db:
     image: mongo
+    container_name: bigdon_mongo
     ports:
       -  "27017:27017"
     volumes:
       - /srv/local/data:/data/db
+  sentiment:
+    image: sentimentweb
+    container_name: bigdon_sentimentweb
+    ports:
+      -  "8081:8081"
