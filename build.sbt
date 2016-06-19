@@ -24,6 +24,7 @@ lazy val commonSettings = Seq(
     "org.jsoup" % "jsoup" % "1.9.2",
     "com.danielasfregola" %% "twitter4s" % "0.1",
     "com.typesafe" % "config" % "1.3.0",
+    "com.typesafe.akka" % "akka-actor_2.11" % "2.4.7",
     "org.reactivemongo" %% "reactivemongo" % "0.11.13",
     "ch.qos.logback"  %  "logback-classic" % "1.1.3",
     "org.slf4j" %  "slf4j-api" % "1.7.14",
