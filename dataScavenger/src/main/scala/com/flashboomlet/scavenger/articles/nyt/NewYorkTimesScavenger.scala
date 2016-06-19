@@ -53,7 +53,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
   /**
     * Scaffold for the scavengerTrait
     */
-  def scavenge(entity: Entity): Unit = {
+  def scavenge(entities: Set[Entity]): Unit = {
    // entities foreach search terms foreach scavengeArticles(searchterms, today, today)
   }
 

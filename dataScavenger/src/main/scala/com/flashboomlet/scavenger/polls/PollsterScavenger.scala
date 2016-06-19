@@ -21,7 +21,7 @@ class PollsterScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
   /**
     * Scaffold for the scavengerTrait
     */
-  def scavenge(entity: Entity): Unit = {
+  def scavenge(entities: Set[Entity]): Unit = {
     // Scavenge Chart
     val chart = scavengeChart()
     val today = getToday()

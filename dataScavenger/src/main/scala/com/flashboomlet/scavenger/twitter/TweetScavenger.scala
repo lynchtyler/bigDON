@@ -55,16 +55,18 @@ class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
   /**
     * Scaffold for the scavengerTrait
     */
-  def scavenge(entity: Entity): Unit = {
+  def scavenge(entities: Set[Entity]): Unit = {
     // get highest ID for a given search parameter from entity
-    val searchTerms = entity.searchTerms
-    val today = getToday()
-    searchTerms.map { query =>
-      // In the future Search using: searchTweetsFrom(query, sinceID)
-      searchTweetsFrom(query).map { tweets =>
-        tweets.foreach { tweet =>
-          val finalTweet = getFinalTweet(tweet, query, today)
-          // Insert into DB
+    entities.foreach { entity =>
+      val searchTerms = entity.searchTerms
+      val today = getToday()
+      searchTerms.map { query =>
+        // In the future Search using: searchTweetsFrom(query, sinceID)
+        searchTweetsFrom(query).map { tweets =>
+          tweets.foreach { tweet =>
+            val finalTweet = getFinalTweet(tweet, query, today)
+            // Insert into DB
+          }
         }
       }
     }

@@ -1,5 +1,6 @@
 package com.flashboomlet.scavenger
 
+import com.flashboomlet.Driver
 import com.flashboomlet.data.models.Entity
 
 /**
@@ -7,6 +8,10 @@ import com.flashboomlet.data.models.Entity
   */
 trait Scavenger {
 
-  def scavenge(entity: Entity): Unit
+  /**
+    * Scavenges data for the entities
+    * @param entities Entities to scavenge
+    */
+  def scavenge(entities: Set[Entity] = Driver.entities): Unit
 
 }
