@@ -1,6 +1,6 @@
 package com.flashboomlet.db.implicits
 
-import com.flashboomlet.data.models.Tweet
+import com.flashboomlet.data.models.FinalTweet
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentWriter
 
@@ -10,9 +10,9 @@ import reactivemongo.bson.BSONDocumentWriter
 trait TweetImplicits {
 
   /** Implicit writer for MongoDB. */
-  implicit object TweetWriter extends BSONDocumentWriter[Tweet] {
+  implicit object TweetWriter extends BSONDocumentWriter[FinalTweet] {
 
-    override def write(tweet: Tweet): BSONDocument = {
+    override def write(tweet: FinalTweet): BSONDocument = {
       BSONDocument(
         // TODO
       )

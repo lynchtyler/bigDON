@@ -14,6 +14,7 @@ import com.flashboomlet.db.MongoDatabaseDriver
 import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.data.models.PreprocessData
 import com.flashboomlet.preproccessing.FastSentimentClassifier
+import com.flashboomlet.preproccessing.CountUtil.countContent
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import org.jsoup.Jsoup
@@ -92,7 +93,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
 
               val preprocessData: PreprocessData = PreprocessData(
                 sentiment = FastSentimentClassifier.getSentiment(articleBody),
-                counts = Counts(0,0,0,0,Map())
+                counts = countContent(article.title, articleBody, query)
               )
 
               val nytArticle = NewYorkTimesArticle(
