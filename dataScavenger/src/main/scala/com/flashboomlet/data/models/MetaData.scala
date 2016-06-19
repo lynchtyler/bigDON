@@ -16,5 +16,5 @@ case class MetaData(
   source: String,
   searchTerm: String,
   entityId: String,
-  contributions: Option[Int] = None
+  contributions: Int
 )

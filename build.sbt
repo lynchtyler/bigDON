@@ -6,7 +6,6 @@ mainClass in (Compile, run) := Some("com.flashboomlet.fetching.Driver")
 
 lazy val root =
   (project in file(".")).aggregate(
-    wordStorm,
     dataScavenger
   )
 
@@ -32,16 +31,8 @@ lazy val commonSettings = Seq(
   )
 )
 
-lazy val wordStorm = (project in file ("wordStorm"))
-  .settings(commonSettings: _*)
-  .settings(
-    name := "wordStorm",
-    version := "0.0.0"
-  )
-
 lazy val dataScavenger = (project in file ("dataScavenger"))
   .settings(commonSettings: _*)
   .settings(
     name := "dataScavenger",
     version := "0.0.0")
-  .dependsOn(wordStorm)

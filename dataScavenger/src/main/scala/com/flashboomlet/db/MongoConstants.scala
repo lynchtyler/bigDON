@@ -87,6 +87,9 @@ trait MongoConstants {
     /* String constant for the `entity_id` field in a MongoDB MetaData document */
     final val EntityIdString = "entity_id"
 
+    /* String constant for the `entity_id` field in a MongoDB MetaData document */
+    final val ContributionsString = "contributions"
+
   }
 
   /**
@@ -132,7 +135,68 @@ trait MongoConstants {
 
     /* String constant for the 'word_occurrences' field in a MongoDB Counts document */
     final val WordOccurrencesString = "word_occurrences"
-}
+  }
+
+  object TwitterConstants {
+
+    /* String constant for the 'tweetID' field in a MongoDB Counts document */
+    final val TweetIDString = "tweet_id"
+
+    /* String constant for the 'content' field in a MongoDB Counts document */
+    final val ContentString = "content"
+
+    /* String constant for the 'followersCount' field in a MongoDB Counts document */
+    final val FollowersCountString = "followers_count"
+
+    /* String constant for the 'friendsCount' field in a MongoDB Counts document */
+    final val FriendsCountString = "friends_count"
+
+    /* String constant for the 'userID' field in a MongoDB Counts document */
+    final val UserIDString = "user_id"
+
+    /* String constant for the 'name' field in a MongoDB Counts document */
+    final val NameString = "name"
+
+    /* String constant for the 'screenName' field in a MongoDB Counts document */
+    final val ScreenNameString = "screen_name"
+
+    /* String constant for the 'favoriteCount' field in a MongoDB Counts document */
+    final val FavoriteCountString = "favorite_count"
+
+    /* String constant for the 'country' field in a MongoDB Counts document */
+    final val CountryString = "country"
+
+    /* String constant for the 'retweetCount' field in a MongoDB Counts document */
+    final val RetweetCountString = "retweet_count"
+
+    /* String constant for the 'metaData' field in a MongoDB Counts document */
+    final val MetaDataString = "meta_data"
+
+    /* String constant for the 'preprocessData' field in a MongoDB Counts document */
+    final val PreprocessDataString = "preprocess_cata"
+  }
+
+  /**
+    * String constants used across the entirity of the MongoDB database
+    */
+  object ChartConstants {
+
+    /* String constant for the 'date' field in a MongoDB Counts document */
+    final val DateString = "date"
+
+    /* String constant for the 'clinton' field in a MongoDB Counts document */
+    final val ClintonString = "clinton"
+
+    /* String constant for the 'trump' field in a MongoDB Counts document */
+    final val TrumpString = "trump"
+
+    /* String constant for the 'other' field in a MongoDB Counts document */
+    final val OtherString = "other"
+
+    /* String constant for the 'undecided' field in a MongoDB Counts document */
+    final val UndecidedString = "undecided"
+
+  }
 
   /**
     * String constants used across the entirity of the MongoDB database

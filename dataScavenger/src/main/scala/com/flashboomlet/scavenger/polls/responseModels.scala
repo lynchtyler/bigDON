@@ -82,5 +82,5 @@ case class Point (
   */
 case class DataPoint (
   choice: String,
-  value: Float
+  value: Double
 )
