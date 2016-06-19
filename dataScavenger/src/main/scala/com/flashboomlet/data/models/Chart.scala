@@ -1,7 +1,5 @@
 package com.flashboomlet.data.models
 
-import java.sql.Date
-
 /**
   * Case class for the Estimates By Date's
   *
@@ -12,9 +10,10 @@ import java.sql.Date
   * @param undecided the value for undecided
   */
 case class Chart(
-  date: Date,
-  clinton: Float,
-  trump: Float,
-  other: Float,
-  undecided: Float
+  date: String,
+  clinton: Double,
+  trump: Double,
+  other: Double,
+  undecided: Double,
+  metaData: MetaData
 )

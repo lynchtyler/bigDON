@@ -33,11 +33,5 @@ object Driver {
       TweetScavenger(),
       PollsterScavenger()
     )
-
-    // fetch newYorkTimesScavenger.scavengeArticles(...) here! . . . or start a chron job
-    // newYorkTimesScavenger.scavengeArticles("trump","20160615", "20160616")
-    // tweetScavenger.searchNRecentTweets("#Trump")
-    // tweetScavenger.fetchUserTimelineTop100Tweets(("2413302566").toLong) // @USALynch 's timeline
-    // pollsterScavenger.scavengeChart()
   }
 }

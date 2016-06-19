@@ -14,6 +14,9 @@ import com.flashboomlet.db.MongoDatabaseDriver
 import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.data.models.PreprocessData
 import com.flashboomlet.preproccessing.FastSentimentClassifier
+import com.flashboomlet.preproccessing.CountUtil.countContent
+import com.flashboomlet.preproccessing.DateUtil.getToday
+import com.flashboomlet.preproccessing.DateUtil.normalizeDate
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import org.jsoup.Jsoup
@@ -83,16 +86,17 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
               val htmlDoc: Document = Jsoup.parse(new URL(article.url), TimeoutAllowed)
               val articleBody: String = htmlDoc.getElementsByClass("story-body-text").text()
               val metaData: MetaData = MetaData(
-                fetchDate = new Date().toString,
-                publishDate = article.publishDate,
+                fetchDate = getToday,
+                publishDate = normalizeDate(article.publishDate),
                 source = article.source,
                 searchTerm = query,
-                entityId = ""
+                entityId = "",
+                contributions = article.keyPeople.size
               )
 
               val preprocessData: PreprocessData = PreprocessData(
                 sentiment = FastSentimentClassifier.getSentiment(articleBody),
-                counts = Counts(0,0,0,0,Map())
+                counts = countContent(article.title, articleBody, query)
               )
 
               val nytArticle = NewYorkTimesArticle(

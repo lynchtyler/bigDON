@@ -34,6 +34,12 @@ object DateUtil {
     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmZ").withZone(ZoneOffset.UTC)
   }
 
+  private def shortDateFormatter(): DateTimeFormatter = {
+    DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC)
+  }
+
+
+
   /**
     * getToday returns today's date time in iso format
     * @return iso formatted dateTime
@@ -50,6 +56,16 @@ object DateUtil {
     */
   def convertTwitterDate(date: Date): String = {
     isoFormatter.format(twitterFormatter.parse(date.toString))
+  }
+
+  /**
+    * Takes a short date and converts it to a full ISO format.
+    *
+    * @param date date
+    * @return iso formatted dateTime in a String
+    */
+  def shortDateNormalize(date: Date): String = {
+    isoFormatter.format(shortDateFormatter.parse(date.toString))
   }
 
   /**

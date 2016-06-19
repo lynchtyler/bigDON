@@ -11,7 +11,7 @@ import scalaj.http.Http
 /** Object containing REST call to analyze sentiment of text */
 object FastSentimentClassifier {
 
-  private[this] val RequestLocation = "http://sentiment.vivekn.com/api/text/"
+  private[this] val RequestLocation = "http://localhost:8081/web/text/"
 
   /**
     * Gets the sentiment of a piece of text by querient the fast sentiment classifier rest api.
