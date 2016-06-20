@@ -14,8 +14,6 @@ import reactivemongo.bson.BSONString
 /**
   * Implicit readers and writers for the tweet model in the tweets collection of MongoDB
   */
-
-/** Implicit readers and writers for the preprocessing data model in MongoDB */
 trait TweetImplicits
   extends MongoConstants
   with MetaDataImplicits

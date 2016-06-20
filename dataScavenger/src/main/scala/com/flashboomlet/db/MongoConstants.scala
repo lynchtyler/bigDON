@@ -22,6 +22,9 @@ trait MongoConstants {
   /* String constant for the entities collection */
   final val EntitiesCollection = "entities"
 
+  /* String constant for the Twitter Searches collection */
+  final val TwitterSearchesCollection = "twittersearches"
+
   /* String constant for the chart collection */
   final val PollsterDataPointsCollection = "pollsterdatapoints"
 
@@ -177,6 +180,18 @@ trait MongoConstants {
 
     /* String constant for the 'preprocessData' field in a MongoDB Counts document */
     final val PreprocessDataString = "preprocess_cata"
+  }
+
+  object TwitterSearchConstants {
+
+    /* String constant for the 'query' field in a MongoDB TwitterSearchDocument */
+    val QueryString = "query"
+
+    /* String constant for the 'entity_last_name' field in a MongoDB TwitterSearchDocument */
+    val EntityLastNameString = "entity_last_name"
+
+    /* String constant for the 'recent_twitter_id' field in a MongoDB TwitterSearchDocument */
+    val RecentTwitterIdString = "recent_twitter_id"
   }
 
   /**
