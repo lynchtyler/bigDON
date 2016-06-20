@@ -5,8 +5,6 @@ import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.preproccessing.DateUtil.getToday
 import com.flashboomlet.scavenger.Scavenger
-import com.flashboomlet.preproccessing.DateUtil.shortDateNormalize
-import com.flashboomlet.preproccessing.DateUtil.normalizeDate
 
 import scalaj.http.Http
 import scalaj.http.HttpRequest
@@ -17,6 +15,14 @@ import scalaj.http.HttpRequest
   * Class that fetches chart data from Huffington Posts Pollster API
   */
 class PollsterScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
+
+  final val ClintonIndex = 0
+
+  final val TrumpIndex = 1
+
+  final val OtherIndex = 2
+
+  final val UndecidedIndex = 3
 
   /**
     * Scaffold for the scavengerTrait
@@ -29,7 +35,7 @@ class PollsterScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
     // Metadata
     val metaData = MetaData(
       fetchDate = today,
-      publishDate = normalizeDate(chart.last_updated),
+      publishDate = today,
       source = "Pollster",
       searchTerm = "",
       entityId = "", // TODO
@@ -37,12 +43,12 @@ class PollsterScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
     )
     // Convert Chart Response to Chart Model
     val finalChart = estimates.map { day =>
-      com.flashboomlet.data.models.Chart(
-        date = shortDateNormalize(day.date),
-        clinton = day.estimates.find(x => x.value == "clinton").get.value,
-        trump = day.estimates.find(x => x.value == "trump").get.value,
-        other = day.estimates.find(x => x.value == "other").get.value,
-        undecided = day.estimates.find(x => x.value == "undecided").get.value,
+      com.flashboomlet.data.models.PollsterDataPoint(
+        date = day.date.toString,
+        clinton = day.estimates(ClintonIndex).value,
+        trump = day.estimates(TrumpIndex).value,
+        other = day.estimates(OtherIndex).value,
+        undecided = day.estimates(UndecidedIndex).value,
         metaData = metaData
       )
     }.toList

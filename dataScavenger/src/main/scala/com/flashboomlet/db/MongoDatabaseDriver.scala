@@ -1,7 +1,10 @@
 package com.flashboomlet.db
 
 import com.flashboomlet.data.MongoConstants
+import com.flashboomlet.data.models.PollsterDataPoint
 import com.flashboomlet.data.models.Entity
+import com.flashboomlet.data.models.FinalTweet
+import com.flashboomlet.data.models.NewYorkTimesArticle
 import com.flashboomlet.db.implicits.MongoImplicits
 import com.typesafe.scalalogging.LazyLogging
 import reactivemongo.api.BSONSerializationPack.Writer
@@ -39,6 +42,8 @@ class MongoDatabaseDriver
 
   val entitiesCollection: BSONCollection = db(EntitiesCollection)
 
+  val pollsterDataPointsCollection: BSONCollection = db(PollsterDataPointsCollection)
+
   /**
     * Populates all of the entities in the database.
     *
@@ -63,6 +68,37 @@ class MongoDatabaseDriver
         }
       }
     }
+  }
+
+  /**
+    * Populate Tweet populates the tweets
+    *
+    * @param tweet a tweet to be inserted into the database
+    */
+  def insertTweet(tweet: FinalTweet): Unit = {
+    insertAndRetrieveNewId(tweet, tweetsCollection)
+  }
+
+  /**
+    * Populate Chart populates the chart collection with all new data
+    *
+    * @param chart a chart set to be inserted into the database
+    */
+  def populateChart(chart: List[PollsterDataPoint]): Unit = {
+    chart.foreach { point =>
+      if (!pollsterDataPointExists(point.date)) {
+        insertAndRetrieveNewId(point, pollsterDataPointsCollection)
+      }
+    }
+  }
+
+  /**
+    * Populate NYT Article Inserts an Article into the Article Collection
+    *
+    * @param article a NYT article to be inserted into the NYT article database
+    */
+  def insertNYTArticle(article: NewYorkTimesArticle): Unit = {
+    insertAndRetrieveNewId(article, newYorkTimesArticlesCollection)
   }
 
   /**
@@ -95,10 +131,24 @@ class MongoDatabaseDriver
   }
 
   /**
+    * Determines if a data point exists in the database.
+    *
+    * @param date The data to be assessed for uniqueness in the database
+    * @return true if the date exists in an pollster in the database, else false
+    */
+  def pollsterDataPointExists(date: String): Boolean = {
+    val future =  pollsterDataPointsCollection
+      .find(BSONDocument(PollsterDataPointConstants.DateString -> date))
+      .cursor[BSONDocument]().collect[List]()
+      .map(list => if (list.nonEmpty) { true } else { false })
+
+    Await.result(future, Duration.Inf)
+  }
+
+  /**
     * Retrieves the BSONObjectID of an entity that exists in the database
     *
     * @note the entity MUST BE IN THE DB
-    *
     * @param entity entity to retrieve BSON ID for
     * @return The bson object id of the entity
     */

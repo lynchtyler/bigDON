@@ -22,6 +22,9 @@ trait MongoConstants {
   /* String constant for the entities collection */
   final val EntitiesCollection = "entities"
 
+  /* String constant for the chart collection */
+  final val PollsterDataPointsCollection = "pollsterdatapoints"
+
 
   /**
     * String constants used in the New York Times Articles collection model schema
@@ -179,7 +182,7 @@ trait MongoConstants {
   /**
     * String constants used across the entirity of the MongoDB database
     */
-  object ChartConstants {
+  object PollsterDataPointConstants {
 
     /* String constant for the 'date' field in a MongoDB Counts document */
     final val DateString = "date"
