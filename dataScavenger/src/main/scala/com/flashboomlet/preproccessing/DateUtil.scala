@@ -38,8 +38,6 @@ object DateUtil {
     DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC)
   }
 
-
-
   /**
     * getToday returns today's date time in iso format
     * @return iso formatted dateTime

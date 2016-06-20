@@ -15,3 +15,4 @@ trait MongoImplicits
   with NewYorkTimesArticleImplicits
   with PreprocessDataImplicits
   with SentimentImplicits
+  with PollsterDataPointImplicits
