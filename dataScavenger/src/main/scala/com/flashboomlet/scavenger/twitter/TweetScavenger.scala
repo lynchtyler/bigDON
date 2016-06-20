@@ -5,7 +5,6 @@ import java.util.Date
 
 import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.preproccessing.FastSentimentClassifier
-
 import com.danielasfregola.twitter4s.TwitterClient
 import com.danielasfregola.twitter4s.entities.Tweet
 import com.danielasfregola.twitter4s.entities.enums.Language
@@ -15,11 +14,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.PreprocessData
 import com.flashboomlet.data.models.FinalTweet
+import com.flashboomlet.data.models.TwitterSearch
+import com.flashboomlet.db.MongoDatabaseDriver
 import com.flashboomlet.preproccessing.CountUtil.countContent
 import com.flashboomlet.preproccessing.DateUtil.getToday
 import com.flashboomlet.preproccessing.DateUtil.convertTwitterDate
 import com.flashboomlet.scavenger.Scavenger
 import com.flashboomlet.scavenger.twitter.configuration.TwitterConfiguration
+import com.typesafe.scalalogging.LazyLogging
 import org.json4s.DefaultFormats
 import org.json4s.Formats
 import org.json4s.native.JsonMethods.parse
@@ -27,8 +29,11 @@ import org.json4s.native.JsonMethods.pretty
 import org.json4s.native.JsonMethods.render
 import org.json4s.native.Serialization
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.util.Try
 
 /**
   * Created by ttlynch on 5/31/16.
@@ -36,7 +41,8 @@ import scala.concurrent.Future
   * Implementation of the Twitter4s API which can be found as:
   *   https://github.com/DanielaSfregola/twitter4s
   */
-class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
+class TweetScavenger(implicit val mapper: ObjectMapper,
+    implicit val db: MongoDatabaseDriver) extends Scavenger with LazyLogging {
 
   final val count = 100
 
@@ -60,15 +66,44 @@ class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
     entities.foreach { entity =>
       val searchTerms = entity.searchTerms
       val today = getToday()
-      searchTerms.map { query =>
-        // In the future Search using: searchTweetsFrom(query, sinceID)
-        searchTweetsFrom(query).map { tweets =>
-          tweets.foreach { tweet =>
-            val finalTweet = getFinalTweet(tweet, query, today)
-            // Insert into DB
+      searchTerms.foreach { query =>
+        Try {
+          val twitterSearch: TwitterSearch = getTweetSearchSinceId(query, entity.lastName)
+          // In the future Search using: searchTweetsFrom(query, sinceID)
+          searchTweetsFrom(query, sinceID = Some(twitterSearch.recentTwitterId)).foreach { tweets =>
+            tweets.map { tweet =>
+              val finalTweet = getFinalTweet(tweet, query, today)
+              // Insert into DB
+            }
           }
-        }
+          db.updateTwitterSearch(twitterSearch)
+        }.getOrElse(
+          logger.error(s"Failed to fetch and inserts tweets for query: ${query}")
+        )
       }
+    }
+  }
+
+  /**
+    * Get the most recent since id for a specific search for a specific entity
+    *
+    * @param query Query associated with the search requiring a sinceid
+    * @param entityLastName the entity last name associated with the query associated with the
+    *                       search requiring a sinceid
+    * @return A sinceid that may be used
+    */
+  def getTweetSearchSinceId(query: String, entityLastName: String): TwitterSearch = {
+    db.getTwitterSearch(query, entityLastName) match {
+      case Some(ts) => ts
+      case None =>
+        val recentTweet = getRecentTweet(query)
+        val twitterSearch = TwitterSearch(
+          query = query,
+          entityLastName = entityLastName,
+          recentTwitterId = recentTweet.tweetID
+        )
+        db.insertTwitterSearch(twitterSearch)
+        twitterSearch
     }
   }
 
@@ -184,9 +219,9 @@ class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
     * @param query the query that you are searching on
     * @return a single tweet in the Final Tweet Format
     */
-  private def getRecentTweet(query: String): Future[FinalTweet] = {
+  private def getRecentTweet(query: String): FinalTweet = {
     val today = getToday()
-    client.searchTweet(
+    val future = client.searchTweet(
       query = query,
       count = 1,
       include_entities = false,
@@ -195,6 +230,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
     ).map { tweets =>
       getFinalTweet(tweets.statuses.head, query, today)
     }
+    Await.result(future, Duration.Inf)
   }
 
   /**

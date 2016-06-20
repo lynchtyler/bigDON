@@ -19,6 +19,7 @@ import com.flashboomlet.preproccessing.DateUtil.getToday
 import com.flashboomlet.preproccessing.DateUtil.normalizeDate
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import com.typesafe.scalalogging.LazyLogging
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -37,7 +38,7 @@ import scalaz.\/-
   * @param apiKeys Wrapper for list of Api keys. Each endpoint needs its own apikey
   */
 class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: ObjectMapper,
-  implicit val db: MongoDatabaseDriver) extends Scavenger {
+  implicit val db: MongoDatabaseDriver) extends Scavenger with LazyLogging {
 
   private[this] val BaseApiPath: String = "https://api.nytimes.com/svc/search/v2"
 
@@ -110,7 +111,9 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
                 preprocessData = preprocessData
               )
               // insert into database needs to be done
-            }.getOrElse(())
+            }.getOrElse(
+              logger.error(s"Failed to parse and insert NYT article: ${article.url}")
+            )
           }
         }
       case -\/(err) => () // we should add logging

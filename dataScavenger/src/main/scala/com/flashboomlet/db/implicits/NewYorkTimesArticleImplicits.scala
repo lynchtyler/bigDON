@@ -39,24 +39,38 @@ trait NewYorkTimesArticleImplicits
 
     override def read(doc: BSONDocument): NewYorkTimesArticle = {
       val url = doc.getAs[String](NYTArticleConstants.UrlString).get
-      val author = doc.getAs[String](NYTArticleConstants.AuthorString).get
-      val title = doc.getAs[String](NYTArticleConstants.TitleString).get
-      val summaries = doc.getAs[Set[String]](NYTArticleConstants.SummariesString).get
-      val keyPeople = doc.getAs[Set[String]](NYTArticleConstants.KeyPeopleString).get
+      val author = doc.getAs[String](NYTArticleConstants.AuthorString)
+      val title = doc.getAs[String](NYTArticleConstants.TitleString)
+      val summaries = doc.getAs[Set[String]](NYTArticleConstants.SummariesString)
+      val keyPeople = doc.getAs[Set[String]](NYTArticleConstants.KeyPeopleString)
       val body = doc.getAs[String](NYTArticleConstants.BodyString).get
       val metaData = doc.getAs[MetaData](GlobalConstants.MetaDataString).get
       val preprocessData = doc.getAs[PreprocessData](GlobalConstants.PreprocessDataString).get
 
       NewYorkTimesArticle(
         url = url,
-        author = author,
-        title = title,
-        summaries = summaries,
-        keyPeople = keyPeople,
+        author = getOptionalString(author),
+        title = getOptionalString(title),
+        summaries = getOptionalSet(summaries),
+        keyPeople = getOptionalSet(keyPeople),
         body = body,
         metaData = metaData,
         preprocessData = preprocessData
       )
+    }
+
+    private[this] def getOptionalString(option: Option[String]): String = {
+      option match {
+        case Some(s) => s
+        case None => ""
+      }
+    }
+
+    private[this] def getOptionalSet(option: Option[Set[String]]): Set[String] = {
+      option match {
+        case Some(s) => s
+        case None => Set()
+      }
     }
   }
 }

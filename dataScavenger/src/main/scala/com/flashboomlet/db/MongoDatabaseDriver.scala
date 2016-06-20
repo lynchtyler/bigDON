@@ -5,13 +5,13 @@ import com.flashboomlet.data.models.PollsterDataPoint
 import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.FinalTweet
 import com.flashboomlet.data.models.NewYorkTimesArticle
+import com.flashboomlet.data.models.TwitterSearch
 import com.flashboomlet.db.implicits.MongoImplicits
 import com.typesafe.scalalogging.LazyLogging
 import reactivemongo.api.BSONSerializationPack.Writer
 import reactivemongo.api.MongoDriver
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
 
@@ -39,6 +39,8 @@ class MongoDatabaseDriver
   val newYorkTimesArticlesCollection: BSONCollection = db(NewYorkTimesArticlesCollection)
 
   val tweetsCollection: BSONCollection = db(TweetsCollection)
+
+  val twitterSearchesCollection: BSONCollection = db(TwitterSearchesCollection)
 
   val entitiesCollection: BSONCollection = db(EntitiesCollection)
 
@@ -122,7 +124,7 @@ class MongoDatabaseDriver
     * @return true if the url exists in an article in the database, else false
     */
   def newYorkTimesArticleExists(url: String): Boolean = {
-    val future =  newYorkTimesArticlesCollection
+    val future = newYorkTimesArticlesCollection
       .find(BSONDocument(NYTArticleConstants.UrlString -> url))
       .cursor[BSONDocument]().collect[List]()
       .map(list => if (list.nonEmpty) { true } else { false })
@@ -143,6 +145,44 @@ class MongoDatabaseDriver
       .map(list => if (list.nonEmpty) { true } else { false })
 
     Await.result(future, Duration.Inf)
+  }
+
+  /**
+    * Gets a twitter search recent tweet id from a given query and entity last name
+    *
+    * @param query query to search for relevent TwitterSearch in DB
+    * @param entityLastName Entity last name to search for relevent TwitterSearch in DB
+    * @return Recent tweet id associated with the TwitterSearch if it exists, else none
+    */
+  def getTwitterSearch(query: String, entityLastName: String): Option[TwitterSearch] ={
+    val future: Future[Option[TwitterSearch]] = twitterSearchesCollection
+      .find(BSONDocument(
+        TwitterSearchConstants.QueryString -> query,
+        TwitterSearchConstants.EntityLastNameString -> entityLastName))
+      .cursor[TwitterSearch]().collect[List]()
+      .map { list => list.headOption }
+
+    Await.result(future, Duration.Inf)
+  }
+
+  /** Simply inserts a twtitter search Model */
+  def insertTwitterSearch(twitterSearch: TwitterSearch): Unit = {
+    insertAndRetrieveNewId(twitterSearch, twitterSearchesCollection)
+  }
+
+  /**
+    * Updates a twitter search model
+    *
+    * @param twitterSearch twitter search model to update
+    */
+  def updateTwitterSearch(twitterSearch: TwitterSearch): Unit = {
+    val selector = BSONDocument(
+      TwitterSearchConstants.QueryString -> twitterSearch.query,
+      TwitterSearchConstants.EntityLastNameString -> twitterSearch.entityLastName)
+    val modifier = BSONDocument("$set" -> BSONDocument(
+      TwitterSearchConstants.RecentTwitterIdString -> twitterSearch.recentTwitterId
+    ))
+    twitterSearchesCollection.update(selector, modifier)
   }
 
   /**
