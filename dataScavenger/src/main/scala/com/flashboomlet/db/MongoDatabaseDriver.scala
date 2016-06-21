@@ -21,6 +21,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Failure
 import scala.util.Success
+import scala.util.Try
 
 /**
   * Database driver for MongoDB
@@ -55,21 +56,25 @@ class MongoDatabaseDriver
     * @param entities Entities to insert into the databse
     */
   def populateEntities(entities: Set[Entity]): Unit = {
-    entities.foreach { (entity: Entity) =>
-      entitiesCollection.find(
-        BSONDocument(EntityConstants.LastNameString -> entity.lastName)
-      ).cursor[Entity]().collect[List]().map { list =>
-        if (list.nonEmpty) {
-          if (!list.head.equals(entity)) {
-            logger.info("Updating entity: " + entity.lastName)
-            updateEntity(entity)
+    Try {
+      entities.foreach { (entity: Entity) =>
+        entitiesCollection.find(
+          BSONDocument(EntityConstants.LastNameString -> entity.lastName)
+        ).cursor[Entity]().collect[List]().map { list =>
+          if (list.nonEmpty) {
+            if (!list.head.equals(entity)) {
+              logger.info("Updating entity: " + entity.lastName)
+              updateEntity(entity)
+            }
+          } else {
+            logger.info("Creating entity: " + entity.lastName)
+            insertAndRetrieveNewId(entity, entitiesCollection)
           }
-        } else {
-          logger.info("Creating entity: " + entity.lastName)
-          insertAndRetrieveNewId(entity, entitiesCollection)
         }
       }
-    }
+    }.getOrElse(
+      logger.error("Failed to populate entities.")
+    )
   }
 
   /**
@@ -77,7 +82,7 @@ class MongoDatabaseDriver
     *
     * @param tweet a tweet to be inserted into the database
     */
-  def insertTweet(tweet: FinalTweet): Unit = {
+  def insertTweet(tweet: FinalTweet): BSONObjectID = {
     insertAndRetrieveNewId(tweet, tweetsCollection)
   }
 

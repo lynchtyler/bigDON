@@ -24,10 +24,6 @@ import com.flashboomlet.scavenger.twitter.configuration.TwitterConfiguration
 import com.typesafe.scalalogging.LazyLogging
 import org.json4s.DefaultFormats
 import org.json4s.Formats
-import org.json4s.native.JsonMethods.parse
-import org.json4s.native.JsonMethods.pretty
-import org.json4s.native.JsonMethods.render
-import org.json4s.native.Serialization
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -74,6 +70,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
             tweets.map { tweet =>
               val finalTweet = getFinalTweet(tweet, query, today)
               // Insert into DB
+              db.insertTweet(finalTweet)
             }
           }
           db.updateTwitterSearch(twitterSearch)
@@ -233,46 +230,6 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     Await.result(future, Duration.Inf)
   }
 
-  /**
-    * QueriedCount takes a string of metaData and parses out the amount of tweets queried.
-    *
-    * This is a great helper function to get all of the tweets from X tweet and helps
-    * searchTweetsFrom by informing it when to stop gathering new tweets as there are none.
-    *
-    * @param params metaData
-    * @return number of tweets queried
-    */
-  private def queriedCount(params: String): Long = {
-    params.split(comma).takeRight(3).take(one).toString.toLong
-  }
-
-  /**
-    * extractNextMaxID takes a string of metaData and parses out the next MaxID to search from.
-    *
-    * This function aids searchForNTweets in collecting N number of tweets by getting the next
-    * batch of tweets
-    *
-    * @param params metaData
-    * @return the next max ID
-    */
-  private def extractNextMaxId(params: String): Option[Long] = {
-    params.split("&").find(_.contains("max_id")).map(_.split("=")(one).toLong)
-  }
-
-  /**
-    * extractNextSinceId takes a string of metaData and parses out the next sinceID to search from.
-    *
-    * This function aids searchTweetsFrom by informing it of where to get the next set of
-    * tweets from
-    *
-    * @param params metaData
-    * @return the next sinceID to query
-    */
-  private def extractNextSinceId(params: String): Option[Long] = {
-    val s = params.split(comma).takeRight(four).take(one)
-    s.toString.split("&").find(_.contains("since_id")).map(_.split("=")(1).toLong)
-  }
-
   private implicit def json4sFormats: Formats = defaultFormats ++ CustomSerializers.all
 
   /**
@@ -285,21 +242,11 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     }
   }
 
-  /**
-    * toJson converts a type T to a String output of formatted JSON specific to the T
-    *
-    * @param value raw data
-    * @tparam T type of data
-    * @return formatted JSON specific to the T
-    */
-  private def toJson[T <: AnyRef](value: T): String =
-    pretty(render(parse(Serialization.write(value))))
-
 }
 
 /** Companion object with a constructor that retrieves configurations */
 object TweetScavenger {
-  def apply()(implicit mapper: ObjectMapper): TweetScavenger = {
+  def apply()(implicit mapper: ObjectMapper, db: MongoDatabaseDriver): TweetScavenger = {
     new TweetScavenger()
   }
 }

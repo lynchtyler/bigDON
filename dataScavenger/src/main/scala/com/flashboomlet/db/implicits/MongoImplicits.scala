@@ -12,3 +12,4 @@ trait MongoImplicits
   with PreprocessDataImplicits
   with SentimentImplicits
   with PollsterDataPointImplicits
+  with TwitterSearchImplicits
