@@ -22,7 +22,7 @@ object DateUtil {
     * @return a formatter for Twitter Date Times
     */
   private def twitterFormatter(): DateTimeFormatter = {
-    DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss ZZZZZ yyyy").withZone(ZoneOffset.UTC)
+    DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss ZZZ yyyy").withZone(ZoneOffset.UTC)
   }
 
   /**
@@ -40,6 +40,7 @@ object DateUtil {
 
   /**
     * getToday returns today's date time in iso format
+    *
     * @return iso formatted dateTime
     */
   def getToday(): String = {

@@ -5,7 +5,17 @@
       "lastName":"Trump",
       "party":"Rep",
       "searchTerms":[
-        "trump"
+        "trump",
+        "maga",
+        "make america great again",
+        "trump2016",
+        "realdonaldtrump",
+        "makeamericagreatagain",
+        "americafirst",
+        "trumptrain",
+        "republican",
+        "election2016",
+        "election"
       ]
     },
     {
@@ -13,7 +23,13 @@
       "lastName":"Clinton",
       "party":"Dem",
       "searchTerms":[
-        "clinton"
+        "clinton",
+        "imwithher",
+        "hillary2016",
+        "hfa",
+        "hillaryforamerica",
+        "hillaryclinton",
+        "democratic"
       ]
     }
   ]

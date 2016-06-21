@@ -16,7 +16,7 @@ object AkkaConstants {
   private[this] val InitialMilliseconds = 5000
 
   /** Length between schedule ticks for a twitter actor, in milliseconds */
-  private[this] val TwitterMilliseconds = 1500
+  private[this] val TwitterMilliseconds = 60000
 
   /** Length between schedule ticks for a new york times actor, in hours */
   private[this] val NewYorkTimesHours = 24
