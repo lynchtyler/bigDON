@@ -19,6 +19,8 @@ object CountUtil {
 
   private val space: String = " "
 
+  private val listAdjustmentLength = 1
+
   /**
     * Word Count in a string
     *
@@ -64,16 +66,14 @@ object CountUtil {
   /**
     * The Count of the Search term words
     *
-    * @param occurrences
-    * @param searchTerms
+    * @param content
+    * @param searchTerm
     * @return
     */
   private def searchTermCount(
-    occurrences: Map[String, Int],
-    searchTerms: String): Int = {
-    occurrences.filterKeys(word =>
-      searchTerms.contains(word)
-    ).foldLeft(0)(_ + _._2)
+    content: String,
+    searchTerm: String): Int = {
+    content.toLowerCase.split(searchTerm).length-listAdjustmentLength
   }
 
   /**
@@ -91,16 +91,16 @@ object CountUtil {
 
     val occurrences = ListMap(wordOccurrences(content).sortWith(_._2 > _._2): _*)
 
-    val ten: Int = 10
-    val topTen = ListMap(occurrences.filterKeys((s: String) =>
+    val ten: Int = 20
+    val topTerms = ListMap(occurrences.filterKeys((s: String) =>
       !commonWord(s)).take(ten).toSeq.sortWith(_._2 > _._2): _*)
 
     Counts(
       wordCount = wordCount(content),
       sentenceCount = sentenceCount(content),
       titleWordCount = wordCount(title),
-      searchTermCount = searchTermCount(occurrences, searchTerm),
-      wordOccurrences = occurrences
+      searchTermCount = searchTermCount(content, searchTerm),
+      wordOccurrences = topTerms
     )
   }
 
