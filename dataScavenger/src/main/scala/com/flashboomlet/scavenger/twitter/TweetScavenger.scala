@@ -59,12 +59,12 @@ class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
     // get highest ID for a given search parameter from entity
     entities.foreach { entity =>
       val searchTerms = entity.searchTerms
-      val today = getToday()
+      val today = new Date
       searchTerms.map { query =>
         // In the future Search using: searchTweetsFrom(query, sinceID)
         searchTweetsFrom(query).map { tweets =>
           tweets.foreach { tweet =>
-            val finalTweet = getFinalTweet(tweet, query, today)
+            val finalTweet = getFinalTweet(tweet, query, today.toString)
             // Insert into DB
           }
         }
@@ -87,7 +87,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
 
       MetaData(
         fetchDate = today,
-        publishDate = convertTwitterDate(tweetDate),
+        publishDate = tweetDate.toString,
         source = "Twiiter",
         searchTerm = query,
         entityId = "", // TODO
@@ -185,7 +185,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
     * @return a single tweet in the Final Tweet Format
     */
   private def getRecentTweet(query: String): Future[FinalTweet] = {
-    val today = getToday()
+    val today = new Date
     client.searchTweet(
       query = query,
       count = 1,
@@ -193,7 +193,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
       result_type = ResultType.Recent,
       language = Some(Language.English)
     ).map { tweets =>
-      getFinalTweet(tweets.statuses.head, query, today)
+      getFinalTweet(tweets.statuses.head, query, today.toString)
     }
   }
 
@@ -244,7 +244,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
     */
   private val defaultFormats = new DefaultFormats {
     override def dateFormatter = {
-      val simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZ yyyy")
+      val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
       simpleDateFormat
     }
   }

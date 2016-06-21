@@ -1,9 +1,13 @@
 package com.flashboomlet.preproccessing
 
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Date
+
+import org.json4s.DefaultFormats
+import com.github.nscala_time.time.Imports._
 
 /**
   * DateUtil is used to handle the date conversions from various sources into the proper
@@ -17,33 +21,12 @@ import java.util.Date
 object DateUtil {
 
   /**
-    * Formatter for twitter dates.
-    *
-    * @return a formatter for Twitter Date Times
-    */
-  private def twitterFormatter(): DateTimeFormatter = {
-    DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss ZZZZZ yyyy").withZone(ZoneOffset.UTC)
-  }
-
-  /**
-    * Formatter for ISO Dates
-    *
-    * @return a formatter for ISO Date Times
-    */
-  private def isoFormatter(): DateTimeFormatter = {
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmZ").withZone(ZoneOffset.UTC)
-  }
-
-  private def shortDateFormatter(): DateTimeFormatter = {
-    DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC)
-  }
-
-  /**
     * getToday returns today's date time in iso format
+    *
     * @return iso formatted dateTime
     */
   def getToday(): String = {
-    isoFormatter.format(Instant.now())
+    Instant.now().toString
   }
 
   /**
@@ -53,7 +36,7 @@ object DateUtil {
     * @return iso formatted dateTime in a String
     */
   def convertTwitterDate(date: Date): String = {
-    isoFormatter.format(twitterFormatter.parse(date.toString))
+    date.toString
   }
 
   /**
@@ -63,7 +46,7 @@ object DateUtil {
     * @return iso formatted dateTime in a String
     */
   def shortDateNormalize(date: Date): String = {
-    isoFormatter.format(shortDateFormatter.parse(date.toString))
+    date.toString
   }
 
   /**
@@ -73,6 +56,16 @@ object DateUtil {
     * @return a normalized date
     */
   def normalizeDate(date: String): String = {
-    isoFormatter.format(isoFormatter.parse(date))
+    DateTime.parse(date).toString
+  }
+
+  /**
+    * Formatter for dates, specifically used for JSON formatting
+    */
+  private val defaultFormats = new DefaultFormats {
+    override def dateFormatter = {
+      val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+      simpleDateFormat
+    }
   }
 }
