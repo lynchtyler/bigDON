@@ -15,6 +15,7 @@ import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.data.models.PreprocessData
 import com.flashboomlet.preproccessing.FastSentimentClassifier
 import com.flashboomlet.preproccessing.CountUtil.countContent
+import com.flashboomlet.preproccessing.DateUtil
 import com.flashboomlet.preproccessing.DateUtil.getToday
 import com.flashboomlet.preproccessing.DateUtil.normalizeDate
 import com.typesafe.config.Config
@@ -56,6 +57,17 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
     */
   def scavenge(entities: Set[Entity]): Unit = {
    // entities foreach search terms foreach scavengeArticles(searchterms, today, today)
+
+   val todayStringQuery = DateUtil.getNytToday()
+   entities.foreach { entity =>
+     entity.searchTerms.foreach { term =>
+       Try {
+         scavengeArticles(term, todayStringQuery, todayStringQuery)
+       }.getOrElse(
+         logger.error("Failed to scavenge Articles")
+       )
+     }
+   }
   }
 
   /**
@@ -87,7 +99,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
               val htmlDoc: Document = Jsoup.parse(new URL(article.url), TimeoutAllowed)
               val articleBody: String = htmlDoc.getElementsByClass("story-body-text").text()
               val metaData: MetaData = MetaData(
-                fetchDate = getToday,
+                fetchDate = getToday(),
                 publishDate = normalizeDate(article.publishDate),
                 source = article.source,
                 searchTerm = query,
@@ -110,7 +122,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
                 metaData = metaData,
                 preprocessData = preprocessData
               )
-              // insert into database needs to be done
+              db.insertNYTArticle(nytArticle)
             }.getOrElse(
               logger.error(s"Failed to parse and insert NYT article: ${article.url}")
             )

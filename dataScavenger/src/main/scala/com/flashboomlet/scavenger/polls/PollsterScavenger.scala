@@ -3,9 +3,13 @@ package com.flashboomlet.scavenger.polls
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.MetaData
+import com.flashboomlet.data.models.PollsterDataPoint
+import com.flashboomlet.db.MongoDatabaseDriver
 import com.flashboomlet.preproccessing.DateUtil.getToday
 import com.flashboomlet.scavenger.Scavenger
+import com.typesafe.scalalogging.LazyLogging
 
+import scala.util.Try
 import scalaj.http.Http
 import scalaj.http.HttpRequest
 
@@ -14,7 +18,8 @@ import scalaj.http.HttpRequest
   *
   * Class that fetches chart data from Huffington Posts Pollster API
   */
-class PollsterScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
+class PollsterScavenger(implicit val mapper: ObjectMapper,
+    implicit val db: MongoDatabaseDriver) extends Scavenger with LazyLogging {
 
   final val ClintonIndex = 0
 
@@ -28,30 +33,35 @@ class PollsterScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
     * Scaffold for the scavengerTrait
     */
   def scavenge(entities: Set[Entity]): Unit = {
-    // Scavenge Chart
-    val chart = scavengeChart()
-    val today = getToday()
-    val estimates = chart.estimates_by_date
-    // Metadata
-    val metaData = MetaData(
-      fetchDate = today,
-      publishDate = today,
-      source = "Pollster",
-      searchTerm = "",
-      entityId = "", // TODO
-      contributions = chart.poll_count.toInt
-    )
-    // Convert Chart Response to Chart Model
-    val finalChart = estimates.map { day =>
-      com.flashboomlet.data.models.PollsterDataPoint(
-        date = day.date.toString,
-        clinton = day.estimates(ClintonIndex).value,
-        trump = day.estimates(TrumpIndex).value,
-        other = day.estimates(OtherIndex).value,
-        undecided = day.estimates(UndecidedIndex).value,
-        metaData = metaData
+    Try {
+      // Scavenge Chart
+      val chart = scavengeChart()
+      val today = getToday()
+      val estimates = chart.estimates_by_date
+      // Metadata
+      val metaData = MetaData(
+        fetchDate = today,
+        publishDate = today,
+        source = "Pollster",
+        searchTerm = "",
+        entityId = "", // TODO
+        contributions = chart.poll_count.toInt
       )
-    }.toList
+      // Convert Chart Response to Chart Model
+      val finalChart: List[PollsterDataPoint] = estimates.map { day =>
+        com.flashboomlet.data.models.PollsterDataPoint(
+          date = day.date.toString,
+          clinton = day.estimates(ClintonIndex).value,
+          trump = day.estimates(TrumpIndex).value,
+          other = day.estimates(OtherIndex).value,
+          undecided = day.estimates(UndecidedIndex).value,
+          metaData = metaData
+        )
+      }.toList
+      db.populateChart(finalChart)
+    }.getOrElse(
+      logger.error("Failec to scavenge Pollster data.")
+    )
   }
 
   /**
@@ -85,7 +95,7 @@ class PollsterScavenger(implicit val mapper: ObjectMapper) extends Scavenger {
 
 /** Companion object with a constructor that retrieves configurations */
 object PollsterScavenger {
-  def apply()(implicit mapper: ObjectMapper): PollsterScavenger = {
+  def apply()(implicit mapper: ObjectMapper, db: MongoDatabaseDriver): PollsterScavenger = {
     new PollsterScavenger()
   }
 }

@@ -1,8 +1,10 @@
 package com.flashboomlet.preproccessing
 
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Date
 
 /**
@@ -15,6 +17,8 @@ import java.util.Date
   *
   */
 object DateUtil {
+
+  private val NytQueryDateFormat = "yyyyMMdd"
 
   /**
     * Formatter for twitter dates.
@@ -44,6 +48,12 @@ object DateUtil {
     */
   def getToday(): String = {
     isoFormatter.format(Instant.now())
+  }
+
+  def getNytToday(): String = {
+    val simpleDateFormat = new SimpleDateFormat(NytQueryDateFormat)
+    val calendar: Calendar = Calendar.getInstance()
+    simpleDateFormat.format(calendar.getTime)
   }
 
   /**

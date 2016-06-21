@@ -12,13 +12,17 @@ import akka.actor.Props
 import com.flashboomlet.actors.AkkaConstants
 import com.flashboomlet.actors.PollsterTickActor
 import com.flashboomlet.actors.TwitterTickActor
+import com.flashboomlet.preproccessing.DateUtil
 import com.flashboomlet.scavenger.articles.nyt.NewYorkTimesScavenger
 import com.flashboomlet.scavenger.polls.PollsterScavenger
 import com.flashboomlet.scavenger.twitter.TweetScavenger
+import com.typesafe.scalalogging.LazyLogging
+
+import scala.util.Try
 
 
 /** Entry point to the data scavenger program */
-object Driver {
+object Driver extends LazyLogging {
 
   val system = ActorSystem("scavengersystem")
 
@@ -53,28 +57,30 @@ object Driver {
     * Configures and schedules all of the tick actors.
     */
   def configureScheduler(): Unit = {
-    import system.dispatcher  // scalastyle:ignore import.grouping
+    Try {
+      import system.dispatcher // scalastyle:ignore import.grouping
 
-    val nytActor = system.actorOf(Props(classOf[NewYorkTimesTickActor]))
-    val twitterActor = system.actorOf(Props(classOf[TwitterTickActor]))
-    val pollsterActor = system.actorOf(Props(classOf[PollsterTickActor]))
+      val nytActor = system.actorOf(Props(classOf[NewYorkTimesTickActor]))
+      val twitterActor = system.actorOf(Props(classOf[TwitterTickActor]))
+      val pollsterActor = system.actorOf(Props(classOf[PollsterTickActor]))
 
-    system.scheduler.schedule(
-      AkkaConstants.InitialDelay,
-      AkkaConstants.TwitterTickLength,
-      twitterActor,
-      AkkaConstants.Tick)
+      system.scheduler.schedule(
+        AkkaConstants.InitialDelay,
+        AkkaConstants.TwitterTickLength,
+        twitterActor,
+        AkkaConstants.Tick)
 
-    system.scheduler.schedule(
-      AkkaConstants.InitialDelay,
-      AkkaConstants.NewYorkTimesLength,
-      nytActor,
-      AkkaConstants.Tick)
+      system.scheduler.schedule(
+        AkkaConstants.InitialDelay,
+        AkkaConstants.NewYorkTimesLength,
+        nytActor,
+        AkkaConstants.Tick)
 
-    system.scheduler.schedule(
-      AkkaConstants.InitialDelay,
-      AkkaConstants.PollsterLength,
-      pollsterActor,
-      AkkaConstants.Tick)
+      system.scheduler.schedule(
+        AkkaConstants.InitialDelay,
+        AkkaConstants.PollsterLength,
+        pollsterActor,
+        AkkaConstants.Tick)
+    }.getOrElse(logger.error("Failed to configure scheduler."))
   }
 }
