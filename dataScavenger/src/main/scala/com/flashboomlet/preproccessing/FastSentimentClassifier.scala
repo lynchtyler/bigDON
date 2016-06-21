@@ -21,8 +21,10 @@ object FastSentimentClassifier {
     * @return Future sentiment Data
     */
   def getSentiment(text: String)(implicit mapper: ObjectMapper): Sentiment = {
+    val request = Http(RequestLocation).postForm(Seq("txt" -> text)).asString.body
+
     mapper.readValue(
-      Http(RequestLocation).postForm(Seq("txt" -> text)).asBytes.body,
-      classOf[SentimentAnalysis]).result
+      request,
+      classOf[Sentiment])
   }
 }

@@ -4,14 +4,17 @@ import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.PollsterDataPoint
 import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.FinalTweet
+import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.data.models.NewYorkTimesArticle
 import com.flashboomlet.data.models.TwitterSearch
 import com.flashboomlet.db.implicits.MongoImplicits
 import com.typesafe.scalalogging.LazyLogging
+import reactivemongo.api.BSONSerializationPack.Reader
 import reactivemongo.api.BSONSerializationPack.Writer
 import reactivemongo.api.MongoDriver
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.UpdateWriteResult
+import reactivemongo.bson
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
 
@@ -108,6 +111,25 @@ class MongoDatabaseDriver
     insertAndRetrieveNewId(article, newYorkTimesArticlesCollection)
   }
 
+  def addNytMetaData(url: String, metaData: MetaData): Unit = {
+    val selector = BSONDocument(NYTArticleConstants.UrlString -> url)
+
+    val future: Future[Unit] = newYorkTimesArticlesCollection
+      .find(selector = selector)
+      .cursor[NewYorkTimesArticle]().collect[List]()
+      .map(list => list.headOption).map {
+        case Some(a) =>
+          val modifier = BSONDocument(GlobalConstants.SetString -> BSONDocument(
+            GlobalConstants.MetaDatasString -> { a.metaDatas + metaData }
+          ))
+
+          newYorkTimesArticlesCollection.update(selector, modifier)
+        case None => logger.error("Nothing makes sense. We should have retrieved the article.")
+      }
+
+    Await.result(future, Duration.Inf)
+  }
+
   /**
     * Updates an entity's search strings.
     *
@@ -116,7 +138,7 @@ class MongoDatabaseDriver
     */
   def updateEntity(entity: Entity): Future[UpdateWriteResult] = {
     val selector = BSONDocument(EntityConstants.LastNameString -> entity.lastName)
-    val modifier = BSONDocument("$set" -> BSONDocument(
+    val modifier = BSONDocument(GlobalConstants.SetString -> BSONDocument(
       EntityConstants.SearchTermsString -> entity.searchTerms
     ))
     entitiesCollection.update(selector, modifier)
@@ -132,7 +154,21 @@ class MongoDatabaseDriver
     val future = newYorkTimesArticlesCollection
       .find(BSONDocument(NYTArticleConstants.UrlString -> url))
       .cursor[BSONDocument]().collect[List]()
-      .map(list => if (list.nonEmpty) { true } else { false })
+      .map(list => list.nonEmpty)
+
+    Await.result(future, Duration.Inf)
+  }
+
+  def isNytDuplicate(url: String, query: String, entityLastName: String): Boolean = {
+    val future = newYorkTimesArticlesCollection
+      .find(BSONDocument(
+        NYTArticleConstants.UrlString -> url,
+        GlobalConstants.MetaDatasString -> BSONDocument(
+          MetaDataConstants.SearchTermString -> query,
+          MetaDataConstants.EntityLastNameString -> entityLastName
+        )))
+      .cursor[BSONDocument]().collect[List]()
+      .map(list => list.nonEmpty)
 
     Await.result(future, Duration.Inf)
   }
@@ -147,7 +183,7 @@ class MongoDatabaseDriver
     val future =  pollsterDataPointsCollection
       .find(BSONDocument(PollsterDataPointConstants.DateString -> date))
       .cursor[BSONDocument]().collect[List]()
-      .map(list => if (list.nonEmpty) { true } else { false })
+      .map(list => list.nonEmpty)
 
     Await.result(future, Duration.Inf)
   }
@@ -184,10 +220,51 @@ class MongoDatabaseDriver
     val selector = BSONDocument(
       TwitterSearchConstants.QueryString -> twitterSearch.query,
       TwitterSearchConstants.EntityLastNameString -> twitterSearch.entityLastName)
-    val modifier = BSONDocument("$set" -> BSONDocument(
+    val modifier = BSONDocument(GlobalConstants.SetString -> BSONDocument(
       TwitterSearchConstants.RecentTwitterIdString -> twitterSearch.recentTwitterId
     ))
     twitterSearchesCollection.update(selector, modifier)
+  }
+
+  def isTweetDuplicate(query: String, entityLastName: String, tweetId: Long): Boolean = {
+    val future = tweetsCollection.find(BSONDocument(
+      TwitterConstants.TweetIDString -> tweetId,
+      GlobalConstants.MetaDatasString -> BSONDocument(
+        MetaDataConstants.SearchTermString -> query,
+        MetaDataConstants.EntityLastNameString -> entityLastName
+      )))
+      .cursor[FinalTweet]()
+      .collect[List]()
+      .map(list => list.nonEmpty)
+
+    Await.result(future, Duration.Inf)
+  }
+
+  def tweetExists(tweetId: Long): Boolean = {
+    val future = tweetsCollection.find(BSONDocument(TwitterConstants.TweetIDString -> tweetId))
+      .cursor[FinalTweet]()
+      .collect[List]()
+      .map(list => list.nonEmpty)
+
+    Await.result(future, Duration.Inf)
+  }
+
+  def addTweetMetaData(tweeId: Long, metaData: MetaData): Unit = {
+    val selector = BSONDocument(TwitterConstants.TweetIDString -> tweeId)
+
+    val future: Future[Unit] = tweetsCollection
+      .find(selector = selector)
+      .cursor[FinalTweet]().collect[List]()
+      .map(list => list.headOption).map {
+        case Some(a) =>
+          val modifier = BSONDocument(GlobalConstants.SetString -> BSONDocument(
+            GlobalConstants.MetaDatasString -> { a.metaDatas + metaData }
+          ))
+        tweetsCollection.update(selector, modifier)
+      case None => logger.error("Nothing makes sense. We should have retrieved the article.")
+    }
+
+    Await.result(future, Duration.Inf)
   }
 
   /**

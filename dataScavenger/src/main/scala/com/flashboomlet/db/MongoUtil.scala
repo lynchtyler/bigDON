@@ -45,4 +45,18 @@ object MongoUtil {
       doc.add(kv._1 -> BSONString(kv._2.toString))
     }
   }
+
+  def getOptionalString(option: Option[String]): String = {
+    option match {
+      case Some(s) => s
+      case None => ""
+    }
+  }
+
+  def getOptionalSet(option: Option[Set[String]]): Set[String] = {
+    option match {
+      case Some(s) => s
+      case None => Set()
+    }
+  }
 }

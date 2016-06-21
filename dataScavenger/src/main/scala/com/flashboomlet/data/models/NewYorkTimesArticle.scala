@@ -10,6 +10,6 @@ case class NewYorkTimesArticle(
   body: String,
   summaries: Set[String],
   keyPeople: Set[String],
-  metaData: MetaData,
+  metaDatas: Set[MetaData],
   preprocessData: PreprocessData
 )

@@ -23,6 +23,6 @@ case class FinalTweet(
   favoriteCount: Int,
   country: String,
   retweetCount: Long,
-  metaData: MetaData,
+  metaDatas: Set[MetaData],
   preprocessData: PreprocessData
 )

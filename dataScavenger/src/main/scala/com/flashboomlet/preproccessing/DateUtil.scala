@@ -26,7 +26,7 @@ object DateUtil {
     * @return a formatter for Twitter Date Times
     */
   private def twitterFormatter(): DateTimeFormatter = {
-    DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss ZZZZZ yyyy").withZone(ZoneOffset.UTC)
+    DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss ZZZ yyyy").withZone(ZoneOffset.UTC)
   }
 
   /**
@@ -35,7 +35,7 @@ object DateUtil {
     * @return a formatter for ISO Date Times
     */
   private def isoFormatter(): DateTimeFormatter = {
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmZ").withZone(ZoneOffset.UTC)
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:zz'Z'").withZone(ZoneOffset.UTC)
   }
 
   private def shortDateFormatter(): DateTimeFormatter = {
@@ -74,15 +74,5 @@ object DateUtil {
     */
   def shortDateNormalize(date: Date): String = {
     isoFormatter.format(shortDateFormatter.parse(date.toString))
-  }
-
-  /**
-    * normalizeDate takes a string and normalizes the date to UTC time
-    *
-    * @param date a date to be normalized
-    * @return a normalized date
-    */
-  def normalizeDate(date: String): String = {
-    isoFormatter.format(isoFormatter.parse(date))
   }
 }

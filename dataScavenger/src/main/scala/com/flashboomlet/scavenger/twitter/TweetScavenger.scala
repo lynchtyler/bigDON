@@ -6,7 +6,9 @@ import java.util.Date
 import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.preproccessing.FastSentimentClassifier
 import com.danielasfregola.twitter4s.TwitterClient
+import com.danielasfregola.twitter4s.entities.StatusSearch
 import com.danielasfregola.twitter4s.entities.Tweet
+import com.danielasfregola.twitter4s.entities.TweetId
 import com.danielasfregola.twitter4s.entities.enums.Language
 import com.danielasfregola.twitter4s.entities.enums.ResultType
 import com.danielasfregola.twitter4s.http.unmarshalling.CustomSerializers
@@ -66,14 +68,17 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
         Try {
           val twitterSearch: TwitterSearch = getTweetSearchSinceId(query, entity.lastName)
           // In the future Search using: searchTweetsFrom(query, sinceID)
-          searchTweetsFrom(query, sinceID = Some(twitterSearch.recentTwitterId)).foreach { tweets =>
-            tweets.map { tweet =>
-              val finalTweet = getFinalTweet(tweet, query, today)
-              // Insert into DB
-              db.insertTweet(finalTweet)
+          searchTweetsFrom(
+            query = query,
+            sinceID = Some(twitterSearch.recentTwitterId),
+            entityLastName = entity.lastName)
+          .foreach { tweets =>
+            tweets.foreach { (tweet: Tweet) =>
+              getAndInsertFinalTweet(tweet, query, today)
             }
           }
           db.updateTwitterSearch(twitterSearch)
+          logger.info(s"Successfully inserted tweets for ${entity.lastName}, ${query}")
         }.getOrElse(
           logger.error(s"Failed to fetch and inserts tweets for query: ${query}")
         )
@@ -93,11 +98,11 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     db.getTwitterSearch(query, entityLastName) match {
       case Some(ts) => ts
       case None =>
-        val recentTweet = getRecentTweet(query)
+        val recentTweetId: Long = getRecentTweet(query)
         val twitterSearch = TwitterSearch(
           query = query,
           entityLastName = entityLastName,
-          recentTwitterId = recentTweet.tweetID
+          recentTwitterId = recentTweetId
         )
         db.insertTwitterSearch(twitterSearch)
         twitterSearch
@@ -119,10 +124,10 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
 
       MetaData(
         fetchDate = today,
-        publishDate = convertTwitterDate(tweetDate),
+        publishDate = tweetDate.toString,
         source = "Twiiter",
         searchTerm = query,
-        entityId = "", // TODO
+        entityLastName = "", // TODO
         contributions = 0
       )
   }
@@ -135,30 +140,39 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     * @param today today's date
     * @return a finalTweet object
     */
-  private def getFinalTweet(
-    tweet: Tweet,
-    query: String,
-    today: String): FinalTweet = {
-
-    val sentiment = FastSentimentClassifier.getSentiment(tweet.text)
-    val counts = countContent("", tweet.text, query)
-    val preprocessData = PreprocessData(sentiment, counts)
+  private def getAndInsertFinalTweet(
+      tweet: Tweet,
+      query: String,
+      today: String): Unit = {
     val metaData = getMetaData(today, tweet.created_at, query)
 
-    FinalTweet(
-      tweetID = tweet.id,
-      content = tweet.text,
-      followersCount = tweet.user.get.followers_count,
-      friendsCount = tweet.user.get.friends_count,
-      userID = tweet.user.get.id,
-      name = tweet.user.get.name,
-      screenName = tweet.user.get.screen_name,
-      favoriteCount = tweet.favorite_count,
-      country = tweet.place.get.country,
-      retweetCount = tweet.retweet_count,
-      metaData: MetaData,
-      preprocessData: PreprocessData
-    )
+    if (db.tweetExists(tweet.id)) {
+      db.addTweetMetaData(tweet.id, metaData)
+    } else {
+      val sentiment = FastSentimentClassifier.getSentiment(tweet.text)
+      val counts = countContent("", tweet.text, query)
+      val preprocessData = PreprocessData(sentiment, counts)
+
+
+      val finalTweet = FinalTweet(
+        tweetID = tweet.id,
+        content = tweet.text,
+        followersCount = tweet.user.get.followers_count,
+        friendsCount = tweet.user.get.friends_count,
+        userID = tweet.user.get.id,
+        name = tweet.user.get.name,
+        screenName = tweet.user.get.screen_name,
+        favoriteCount = tweet.favorite_count,
+        country = tweet.place match {
+            case Some(g) => g.country
+            case None => "N/A"
+        },
+        retweetCount = tweet.retweet_count,
+        metaDatas = Set(metaData),
+        preprocessData: PreprocessData
+      )
+      db.insertTweet(finalTweet)
+    }
   }
 
   /**
@@ -196,6 +210,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     */
   private def searchTweetsFrom(
     query: String,
+    entityLastName: String,
     sinceID: Option[Long] = None): Future[Seq[Tweet]] = {
 
     client.searchTweet(
@@ -206,7 +221,9 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
       language = Some(Language.English),
       since_id = sinceID
     ).map { tweets =>
-      tweets.statuses
+      tweets.statuses.filter((tweet: Tweet) =>
+        !db.isTweetDuplicate(query, entityLastName, tweet.id)
+      )
     }
   }
 
@@ -216,7 +233,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     * @param query the query that you are searching on
     * @return a single tweet in the Final Tweet Format
     */
-  private def getRecentTweet(query: String): FinalTweet = {
+  private def getRecentTweet(query: String): Long = {
     val today = getToday()
     val future = client.searchTweet(
       query = query,
@@ -224,8 +241,8 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
       include_entities = false,
       result_type = ResultType.Recent,
       language = Some(Language.English)
-    ).map { tweets =>
-      getFinalTweet(tweets.statuses.head, query, today)
+    ).map { (statusSearch: StatusSearch) =>
+      statusSearch.statuses.head.id
     }
     Await.result(future, Duration.Inf)
   }
@@ -242,6 +259,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     }
   }
 
+  private[this] def getString(field: String): String = Option(field).getOrElse("")
 }
 
 /** Companion object with a constructor that retrieves configurations */

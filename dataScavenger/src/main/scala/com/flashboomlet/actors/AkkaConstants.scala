@@ -2,6 +2,7 @@ package com.flashboomlet.actors
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration.MILLISECONDS
+import scala.concurrent.duration.SECONDS
 import scala.concurrent.duration.HOURS
 
 /**
@@ -16,7 +17,7 @@ object AkkaConstants {
   private[this] val InitialMilliseconds = 5000
 
   /** Length between schedule ticks for a twitter actor, in milliseconds */
-  private[this] val TwitterMilliseconds = 1500
+  private[this] val TwitterSeconds = 60
 
   /** Length between schedule ticks for a new york times actor, in hours */
   private[this] val NewYorkTimesHours = 24
@@ -30,7 +31,7 @@ object AkkaConstants {
   val InitialDelay = FiniteDuration(InitialMilliseconds, MILLISECONDS)
 
   /** Finite duration for time between tweet fetching */
-  val TwitterTickLength = FiniteDuration(TwitterMilliseconds, MILLISECONDS)
+  val TwitterTickLength = FiniteDuration(TwitterSeconds, SECONDS)
 
   /** Finite duration for time between article fetching */
   val NewYorkTimesLength = FiniteDuration(NewYorkTimesHours, HOURS)

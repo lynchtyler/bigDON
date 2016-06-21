@@ -4,6 +4,7 @@ import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.FinalTweet
 import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.data.models.PreprocessData
+import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
@@ -34,7 +35,7 @@ trait TweetImplicits
         TwitterConstants.FavoriteCountString -> BSONInteger(tweet.favoriteCount),
         TwitterConstants.CountryString -> BSONString(tweet.country),
         TwitterConstants.RetweetCountString -> BSONLong(tweet.retweetCount),
-        TwitterConstants.MetaDataString -> tweet.metaData,
+        TwitterConstants.MetaDataString -> BSONArray(tweet.metaDatas),
         TwitterConstants.PreprocessDataString -> tweet.preprocessData
       )
     }
@@ -54,7 +55,7 @@ trait TweetImplicits
       val favoriteCount = doc.getAs[Int](TwitterConstants.FavoriteCountString).get
       val country = doc.getAs[String](TwitterConstants.CountryString).get
       val retweetCount = doc.getAs[Long](TwitterConstants.RetweetCountString).get
-      val metaData = doc.getAs[MetaData](GlobalConstants.MetaDataString).get
+      val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString).get
       val preprocessData = doc.getAs[PreprocessData](GlobalConstants.PreprocessDataString).get
 
       FinalTweet(
@@ -68,7 +69,7 @@ trait TweetImplicits
         favoriteCount = favoriteCount,
         country = country,
         retweetCount = retweetCount,
-        metaData = metaData,
+        metaDatas = metaData,
         preprocessData = preprocessData
       )
 

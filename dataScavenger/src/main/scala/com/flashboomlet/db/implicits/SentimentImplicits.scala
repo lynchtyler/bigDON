@@ -15,8 +15,8 @@ trait SentimentImplicits extends MongoConstants {
   implicit object SentimentWriter extends BSONDocumentWriter[Sentiment] {
 
     override def write(sentiment: Sentiment): BSONDocument = BSONDocument(
-      SentimentConstants.SentimentString -> BSONString(sentiment.sentiment),
-      SentimentConstants.ConfidenceString -> BSONDouble(sentiment.confidence)
+      SentimentConstants.ResultString -> BSONString(sentiment.result),
+      SentimentConstants.ConfidenceString -> BSONString(sentiment.confidence)
     )
   }
 
@@ -25,10 +25,10 @@ trait SentimentImplicits extends MongoConstants {
   implicit object SentimentReader extends BSONDocumentReader[Sentiment] {
 
     override def read(doc: BSONDocument): Sentiment = {
-      val sentiment = doc.getAs[String](SentimentConstants.SentimentString).get
-      val confidence = doc.getAs[Double](SentimentConstants.ConfidenceString).get
+      val sentiment = doc.getAs[String](SentimentConstants.ResultString).get
+      val confidence = doc.getAs[String](SentimentConstants.ConfidenceString).get
 
-      Sentiment(sentiment, confidence.asInstanceOf[Float])
+      Sentiment(sentiment, confidence)
     }
   }
 }
