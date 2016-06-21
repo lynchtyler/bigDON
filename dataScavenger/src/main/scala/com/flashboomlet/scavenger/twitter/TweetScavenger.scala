@@ -8,7 +8,6 @@ import com.flashboomlet.preproccessing.FastSentimentClassifier
 import com.danielasfregola.twitter4s.TwitterClient
 import com.danielasfregola.twitter4s.entities.StatusSearch
 import com.danielasfregola.twitter4s.entities.Tweet
-import com.danielasfregola.twitter4s.entities.TweetId
 import com.danielasfregola.twitter4s.entities.enums.Language
 import com.danielasfregola.twitter4s.entities.enums.ResultType
 import com.danielasfregola.twitter4s.http.unmarshalling.CustomSerializers
@@ -20,7 +19,6 @@ import com.flashboomlet.data.models.TwitterSearch
 import com.flashboomlet.db.MongoDatabaseDriver
 import com.flashboomlet.preproccessing.CountUtil.countContent
 import com.flashboomlet.preproccessing.DateUtil.getToday
-import com.flashboomlet.preproccessing.DateUtil.convertTwitterDate
 import com.flashboomlet.scavenger.Scavenger
 import com.flashboomlet.scavenger.twitter.configuration.TwitterConfiguration
 import com.typesafe.scalalogging.LazyLogging
@@ -169,7 +167,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
         },
         retweetCount = tweet.retweet_count,
         metaDatas = Set(metaData),
-        preprocessData: PreprocessData
+        preprocessData = preprocessData
       )
       db.insertTweet(finalTweet)
     }

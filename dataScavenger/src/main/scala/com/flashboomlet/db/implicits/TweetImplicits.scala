@@ -55,7 +55,10 @@ trait TweetImplicits
       val favoriteCount = doc.getAs[Int](TwitterConstants.FavoriteCountString).get
       val country = doc.getAs[String](TwitterConstants.CountryString).get
       val retweetCount = doc.getAs[Long](TwitterConstants.RetweetCountString).get
-      val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString).get
+      val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString) match {
+        case Some(m) => m
+        case None => Set[MetaData]()
+      }
       val preprocessData = doc.getAs[PreprocessData](GlobalConstants.PreprocessDataString).get
 
       FinalTweet(

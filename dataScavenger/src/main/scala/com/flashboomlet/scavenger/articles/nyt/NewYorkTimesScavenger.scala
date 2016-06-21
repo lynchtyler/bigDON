@@ -45,7 +45,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
 
   private[this] val OKResponseString: String = "OK"
 
-  private[this] val PolitenessDelay: Int = 30000
+  private[this] val PolitenessDelay: Int = 20000
 
   private[this] val TimeoutAllowed = 5000
 
@@ -60,6 +60,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
    entities.foreach { entity =>
      entity.searchTerms.foreach { term =>
        Try {
+         Thread.sleep(PolitenessDelay)
          scavengeArticles(
            query = term,
            entityLastName = entity.lastName,
