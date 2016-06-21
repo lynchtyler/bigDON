@@ -7,7 +7,7 @@ package com.flashboomlet.data.models
   * @param publishDate the date that the data was published
   * @param source the source of the data
   * @param searchTerm the search term used in fetching the data
-  * @param entityId the ID of the entity
+  * @param entityLastName the ID of the entity
   * @param contributions the contributions; Ex: Count of Authors, Count of Polls, etc...
   */
 case class MetaData(
@@ -15,6 +15,6 @@ case class MetaData(
   publishDate: String,
   source: String,
   searchTerm: String,
-  entityId: String,
+  entityLastName: String,
   contributions: Int
 )

@@ -2,6 +2,7 @@ package com.flashboomlet.db.implicits
 
 import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.MetaData
+import com.flashboomlet.db.MongoUtil
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
@@ -19,7 +20,7 @@ trait MetaDataImplicits extends MongoConstants {
       MetaDataConstants.PublishDateString -> BSONString(metaData.publishDate),
       MetaDataConstants.SourceString -> BSONString(metaData.source),
       MetaDataConstants.SearchTermString -> BSONString(metaData.searchTerm),
-      MetaDataConstants.EntityIdString -> BSONString(metaData.entityId),
+      MetaDataConstants.EntityLastNameString -> BSONString(metaData.entityLastName),
       MetaDataConstants.ContributionsString -> BSONInteger(metaData.contributions)
     )
   }
@@ -30,17 +31,20 @@ trait MetaDataImplicits extends MongoConstants {
     override def read(doc: BSONDocument): MetaData = {
       val fetchDate = doc.getAs[String](MetaDataConstants.FetchDateString).get
       val publishDate = doc.getAs[String](MetaDataConstants.PublishDateString).get
-      val source = doc.getAs[String](MetaDataConstants.SourceString).get
-      val searchTerm = doc.getAs[String](MetaDataConstants.SearchTermString).get
-      val entityId = doc.getAs[String](MetaDataConstants.EntityIdString).get
-      val contributions = doc.getAs[Int](MetaDataConstants.ContributionsString).get
+      val source = doc.getAs[String](MetaDataConstants.SourceString)
+      val searchTerm = doc.getAs[String](MetaDataConstants.SearchTermString)
+      val entityLastName = doc.getAs[String](MetaDataConstants.EntityLastNameString)
+      val contributions = doc.getAs[Int](MetaDataConstants.ContributionsString) match {
+        case Some(c) => c
+        case None => 0
+      }
 
       MetaData(
         fetchDate = fetchDate,
         publishDate = publishDate,
-        source = source,
-        searchTerm = searchTerm,
-        entityId = entityId,
+        source = MongoUtil.getOptionalString(source),
+        searchTerm = MongoUtil.getOptionalString(searchTerm),
+        entityLastName = MongoUtil.getOptionalString(entityLastName),
         contributions = contributions
       )
     }

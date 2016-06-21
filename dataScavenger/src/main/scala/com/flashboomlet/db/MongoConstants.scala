@@ -91,7 +91,7 @@ trait MongoConstants {
     final val SearchTermString = "search_term"
 
     /* String constant for the `entity_id` field in a MongoDB MetaData document */
-    final val EntityIdString = "entity_id"
+    final val EntityLastNameString = "entity_last_name"
 
     /* String constant for the `entity_id` field in a MongoDB MetaData document */
     final val ContributionsString = "contributions"
@@ -116,7 +116,7 @@ trait MongoConstants {
   object SentimentConstants {
 
     /* String constant for the `sentiment` field in a MongoDB Sentiment document */
-    final val SentimentString = "sentiment"
+    final val ResultString = "result"
 
     /* String constant for the `confidence` field in a MongoDB Sentiment document */
     final val ConfidenceString = "confidence"
@@ -222,12 +222,14 @@ trait MongoConstants {
   object GlobalConstants {
 
     /* String constant for the `meta_data` field in a MongoDB document */
-    final val MetaDataString = "meta_data"
+    final val MetaDatasString = "meta_datas"
 
     /* String constant for the `preprocess_data` field in a MongoDB document */
     final val PreprocessDataString = "preprocess_data"
 
     /* String constant for the `_id` field in a MongoDB document */
     final val IdString = "_id"
+
+    final val SetString = "$set"
   }
 }

@@ -22,7 +22,7 @@ trait PollsterDataPointImplicits extends MongoConstants with MetaDataImplicits {
         PollsterDataPointConstants.TrumpString -> BSONDouble(chart.trump),
         PollsterDataPointConstants.OtherString -> BSONDouble(chart.other),
         PollsterDataPointConstants.UndecidedString -> BSONDouble(chart.undecided),
-        GlobalConstants.MetaDataString -> chart.metaData
+        GlobalConstants.MetaDatasString -> chart.metaData
       )
     }
   }
@@ -36,7 +36,7 @@ trait PollsterDataPointImplicits extends MongoConstants with MetaDataImplicits {
       val trump = doc.getAs[Double](PollsterDataPointConstants.TrumpString).get
       val other = doc.getAs[Double](PollsterDataPointConstants.OtherString).get
       val undecided = doc.getAs[Double](PollsterDataPointConstants.UndecidedString).get
-      val metaData = doc.getAs[MetaData](GlobalConstants.MetaDataString).get
+      val metaData = doc.getAs[MetaData](GlobalConstants.MetaDatasString).get
 
       PollsterDataPoint(
         date = date,

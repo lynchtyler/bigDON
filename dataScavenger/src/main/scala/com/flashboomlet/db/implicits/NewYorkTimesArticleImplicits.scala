@@ -4,6 +4,7 @@ import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.data.models.NewYorkTimesArticle
 import com.flashboomlet.data.models.PreprocessData
+import com.flashboomlet.db.MongoUtil
 import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
@@ -28,7 +29,7 @@ trait NewYorkTimesArticleImplicits
         NYTArticleConstants.SummariesString -> BSONArray(nytArticle.summaries),
         NYTArticleConstants.KeyPeopleString -> BSONArray(nytArticle.keyPeople),
         NYTArticleConstants.BodyString -> BSONString(nytArticle.body),
-        GlobalConstants.MetaDataString -> nytArticle.metaData,
+        GlobalConstants.MetaDatasString -> BSONArray(nytArticle.metaDatas),
         GlobalConstants.PreprocessDataString -> nytArticle.preprocessData
       )
     }
@@ -44,33 +45,22 @@ trait NewYorkTimesArticleImplicits
       val summaries = doc.getAs[Set[String]](NYTArticleConstants.SummariesString)
       val keyPeople = doc.getAs[Set[String]](NYTArticleConstants.KeyPeopleString)
       val body = doc.getAs[String](NYTArticleConstants.BodyString).get
-      val metaData = doc.getAs[MetaData](GlobalConstants.MetaDataString).get
+      val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString) match {
+        case Some(m) => m
+        case None => Set[MetaData]()
+      }
       val preprocessData = doc.getAs[PreprocessData](GlobalConstants.PreprocessDataString).get
 
       NewYorkTimesArticle(
         url = url,
-        author = getOptionalString(author),
-        title = getOptionalString(title),
-        summaries = getOptionalSet(summaries),
-        keyPeople = getOptionalSet(keyPeople),
+        author = MongoUtil.getOptionalString(author),
+        title = MongoUtil.getOptionalString(title),
+        summaries = MongoUtil.getOptionalSet(summaries),
+        keyPeople = MongoUtil.getOptionalSet(keyPeople),
         body = body,
-        metaData = metaData,
+        metaDatas = metaData,
         preprocessData = preprocessData
       )
-    }
-
-    private[this] def getOptionalString(option: Option[String]): String = {
-      option match {
-        case Some(s) => s
-        case None => ""
-      }
-    }
-
-    private[this] def getOptionalSet(option: Option[Set[String]]): Set[String] = {
-      option match {
-        case Some(s) => s
-        case None => Set()
-      }
     }
   }
 }

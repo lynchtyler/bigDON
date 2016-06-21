@@ -6,11 +6,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
   * Case class for the actual data being wrapped by the result in the fast sentiment classifier.
   * Doubles as a DB model
   *
-  * @param sentiment the sentiment of the data
+  * @param result the sentiment of the data
   * @param confidence the confidence of the sentiment
   */
 @JsonIgnoreProperties(Array("sentence"))
 case class Sentiment(
-  sentiment: String,
-  confidence: Float
+  result: String,
+  confidence: String
 )

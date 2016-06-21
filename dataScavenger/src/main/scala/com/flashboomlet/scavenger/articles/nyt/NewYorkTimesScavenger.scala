@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.scavenger.errors.SearchError
 import com.flashboomlet.data.PrefetchArticle
 import com.flashboomlet.scavenger.Scavenger
-import com.flashboomlet.data.models.Counts
 import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.NewYorkTimesArticle
 import com.flashboomlet.db.MongoDatabaseDriver
@@ -17,7 +16,6 @@ import com.flashboomlet.preproccessing.FastSentimentClassifier
 import com.flashboomlet.preproccessing.CountUtil.countContent
 import com.flashboomlet.preproccessing.DateUtil
 import com.flashboomlet.preproccessing.DateUtil.getToday
-import com.flashboomlet.preproccessing.DateUtil.normalizeDate
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
@@ -47,7 +45,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
 
   private[this] val OKResponseString: String = "OK"
 
-  private[this] val PolitenessDelay: Int = 2000
+  private[this] val PolitenessDelay: Int = 30000
 
   private[this] val TimeoutAllowed = 5000
 
@@ -62,7 +60,12 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
    entities.foreach { entity =>
      entity.searchTerms.foreach { term =>
        Try {
-         scavengeArticles(term, todayStringQuery, todayStringQuery)
+         scavengeArticles(
+           query = term,
+           entityLastName = entity.lastName,
+           beginDate = todayStringQuery,
+           endDate = todayStringQuery)
+         logger.info(s"Successfully scaveneged articles for ${entity.lastName} : $term")
        }.getOrElse(
          logger.error("Failed to scavenge Articles")
        )
@@ -82,6 +85,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
     */
   private[this] def scavengeArticles(
     query: String,
+    entityLastName: String,
     beginDate: String = "",
     endDate: String = ""): Unit = {
 
@@ -92,44 +96,58 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
 
     fetchArticleSearchQueryMetaDatas(parameters) match {
       case \/-(numPages) =>
-        prefetchArticles(parameters, numPages).map { (articles: Seq[PrefetchArticle]) =>
+        prefetchArticles(query = query, entityLastName = entityLastName, parameters, numPages).map {
+        (articles: Seq[PrefetchArticle]) =>
           articles.foreach { (article: PrefetchArticle) =>
             // Fetch article
-            Try {
-              val htmlDoc: Document = Jsoup.parse(new URL(article.url), TimeoutAllowed)
-              val articleBody: String = htmlDoc.getElementsByClass("story-body-text").text()
-              val metaData: MetaData = MetaData(
-                fetchDate = getToday(),
-                publishDate = normalizeDate(article.publishDate),
-                source = article.source,
-                searchTerm = query,
-                entityId = "",
-                contributions = article.keyPeople.size
-              )
-
-              val preprocessData: PreprocessData = PreprocessData(
-                sentiment = FastSentimentClassifier.getSentiment(articleBody),
-                counts = countContent(article.title, articleBody, query)
-              )
-
-              val nytArticle = NewYorkTimesArticle(
-                url = article.url,
-                title = article.title,
-                author = article.author,
-                body = articleBody,
-                summaries = article.summaries,
-                keyPeople = article.keyPeople,
-                metaData = metaData,
-                preprocessData = preprocessData
-              )
-              db.insertNYTArticle(nytArticle)
-            }.getOrElse(
-              logger.error(s"Failed to parse and insert NYT article: ${article.url}")
-            )
+            constructModelAndInsert(article, query = query, entityLastName =  entityLastName)
           }
         }
-      case -\/(err) => () // we should add logging
+      case -\/(err) => logger.error(err.getMessage)
     }
+  }
+
+  private[this] def constructModelAndInsert(
+      article: PrefetchArticle,
+      query: String,
+      entityLastName: String): Unit = {
+    Try {
+      val htmlDoc: Document = Jsoup.parse(new URL(article.url), TimeoutAllowed)
+      val articleBody: String = htmlDoc.getElementsByClass("story-body-text").text()
+      Try {
+        val metaData: MetaData = MetaData(
+          fetchDate = getToday(),
+          publishDate = article.publishDate,
+          source = article.source,
+          searchTerm = query,
+          entityLastName = entityLastName,
+          contributions = article.keyPeople.size)
+
+        if (db.newYorkTimesArticleExists(article.url)) {
+          db.addNytMetaData(article.url, metaData)
+          logger.info(s"Updating metadata for article ${article.url}")
+        } else {
+          val preprocessData: PreprocessData = PreprocessData(
+            sentiment = FastSentimentClassifier.getSentiment(
+              articleBody
+            ),
+            counts = countContent(article.title, articleBody, query))
+
+          val nytArticle = NewYorkTimesArticle(
+            url = article.url,
+            title = article.title,
+            author = article.author,
+            body = articleBody,
+            summaries = article.summaries,
+            keyPeople = article.keyPeople,
+            metaDatas = Set(metaData),
+            preprocessData = preprocessData
+          )
+          db.insertNYTArticle(nytArticle)
+          logger.info(s"Successfully inserted article ${article.url}")
+        }
+      }.getOrElse(logger.error(s"Failed to create and insert NYT article: $query : ${article.url}"))
+    }.getOrElse(logger.error(s"Failed to Parse article ${query} + ${article.url}"))
   }
 
   /**
@@ -142,6 +160,8 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
     * @return A future sequence of all of the prefetched articles
     */
   private[this] def prefetchArticles(
+      query: String,
+      entityLastName: String,
       queryParameters: Seq[(String, String)],
       numPages: Int): Future[Seq[PrefetchArticle]] = {
 
@@ -152,7 +172,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
     Future {
       (0 until numPages).asInstanceOf[Seq[Int]].flatMap { (pageNum: Int) =>
         Try { global.wait(PolitenessDelay) }.getOrElse(()) // logging would also help here bro
-        getPrefetchArticlesFromPage(request, pageNum)
+        getPrefetchArticlesFromPage(query, entityLastName, request, pageNum)
       }
     }
   }
@@ -194,6 +214,8 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
     * @return A sequence of all prefetch articles from the page that was fetched
     */
   private[this] def getPrefetchArticlesFromPage(
+      query: String,
+      entityLastName: String,
       request: HttpRequest,
       pageNum: Int): Seq[PrefetchArticle] = {
 
@@ -201,7 +223,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
       .response.docs.toSeq
       .filter { (d: Doc) =>
         (d.document_type.contains("blogpost") || d.document_type.contains("article")) &&
-        !db.newYorkTimesArticleExists(d.web_url) } // remove duplicates
+        !db.isNytDuplicate(d.web_url, query, entityLastName) } // remove duplicates
       .map { (doc: Doc) =>
         PrefetchArticle(
           url = doc.web_url,

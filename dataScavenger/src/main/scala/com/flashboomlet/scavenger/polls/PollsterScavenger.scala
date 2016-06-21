@@ -44,7 +44,7 @@ class PollsterScavenger(implicit val mapper: ObjectMapper,
         publishDate = today,
         source = "Pollster",
         searchTerm = "",
-        entityId = "", // TODO
+        entityLastName = "", // TODO
         contributions = chart.poll_count.toInt
       )
       // Convert Chart Response to Chart Model
@@ -59,8 +59,9 @@ class PollsterScavenger(implicit val mapper: ObjectMapper,
         )
       }.toList
       db.populateChart(finalChart)
+      logger.info("Successfully populated pollster chart")
     }.getOrElse(
-      logger.error("Failec to scavenge Pollster data.")
+      logger.error("Failed to scavenge Pollster data.")
     )
   }
 
