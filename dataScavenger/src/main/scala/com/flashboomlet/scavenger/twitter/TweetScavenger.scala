@@ -134,7 +134,7 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
         publishDate = tweetDate.toString,
         source = "Twitter",
         searchTerm = query,
-        entityLastName = "",
+        entityLastName = entityLastName,
         contributions = 0
       )
   }

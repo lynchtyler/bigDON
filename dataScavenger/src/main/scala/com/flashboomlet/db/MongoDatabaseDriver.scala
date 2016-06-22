@@ -69,7 +69,7 @@ class MongoDatabaseDriver
             }
           } else {
             logger.info("Creating entity: " + entity.lastName)
-            insertAndRetrieveNewId(entity, entitiesCollection)
+            insert(entity, entitiesCollection)
           }
         }
       }
@@ -83,8 +83,8 @@ class MongoDatabaseDriver
     *
     * @param tweet a tweet to be inserted into the database
     */
-  def insertTweet(tweet: FinalTweet): BSONObjectID = {
-    insertAndRetrieveNewId(tweet, tweetsCollection)
+  def insertTweet(tweet: FinalTweet): Unit = {
+    insert(tweet, tweetsCollection)
   }
 
   /**
@@ -95,7 +95,7 @@ class MongoDatabaseDriver
   def populateChart(chart: List[PollsterDataPoint]): Unit = {
     chart.foreach { point =>
       if (!pollsterDataPointExists(point.date)) {
-        insertAndRetrieveNewId(point, pollsterDataPointsCollection)
+        insert(point, pollsterDataPointsCollection)
       }
     }
   }
@@ -106,7 +106,7 @@ class MongoDatabaseDriver
     * @param article a NYT article to be inserted into the NYT article database
     */
   def insertNYTArticle(article: NewYorkTimesArticle): Unit = {
-    insertAndRetrieveNewId(article, newYorkTimesArticlesCollection)
+    insert(article, newYorkTimesArticlesCollection)
   }
 
   def addNytMetaData(url: String, metaData: MetaData): Unit = {
@@ -206,7 +206,7 @@ class MongoDatabaseDriver
 
   /** Simply inserts a twtitter search Model */
   def insertTwitterSearch(twitterSearch: TwitterSearch): Unit = {
-    insertAndRetrieveNewId(twitterSearch, twitterSearchesCollection)
+    insert(twitterSearch, twitterSearchesCollection)
   }
 
   /**
@@ -292,24 +292,14 @@ class MongoDatabaseDriver
     * @tparam T Type of the object to be inserted
     * @return The  [[BSONObjectID]] associated with the newly created document
     */
-  private def insertAndRetrieveNewId[T](
-      document: T,
-      coll: BSONCollection,
-      id: Option[String] = None)
-      (implicit writer: Writer[T]): BSONObjectID = {
+  private def insert[T](document: T, coll: BSONCollection)(implicit writer: Writer[T]): Unit = {
 
-    val newId: BSONObjectID = id match {
-      case Some(s) => BSONObjectID(s)
-      case None => BSONObjectID.generate()
-    }
-
-    coll.insert(writer.write(document).add(GlobalConstants.IdString -> id)).onComplete {
+    coll.insert(document).onComplete {
       case Failure(e) =>
         logger.error(s"Failed to insert and create new id into $coll")
         throw e// we fucked up
       case Success(writeResult) => // logging needed we won
     }
-    newId
   }
 }
 
