@@ -45,10 +45,13 @@ object CountUtil {
     val cleanedWords = content.split(space).map {
       _.replaceAll("[\\u2018\\u2019]","'")
       .replaceAll("'s","")
-      .replaceAll("[^A-Za-z]@#","")
+      .replaceAll("[^A-Za-z@#]","")
       .toLowerCase
     }
-    cleanedWords.distinct.map{ (unique: String) =>
+
+    // TODO: Handle Urls as words
+
+    cleanedWords.distinct.map { (unique: String) =>
       (unique, cleanedWords.count(other => other.equals(unique)))
     }
   }
