@@ -39,7 +39,7 @@ trait CountsImplicits extends MongoConstants {
         titleWordCount = titleWordCount,
         searchTermCount = searchTermCount,
         wordOccurrences = MongoUtil.bsonDocumentToMap(
-          wordOccurrences).asInstanceOf[Map[String, Int]]
+          wordOccurrences)
       )
     }
   }

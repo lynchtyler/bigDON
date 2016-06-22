@@ -12,7 +12,6 @@ import akka.actor.Props
 import com.flashboomlet.actors.AkkaConstants
 import com.flashboomlet.actors.PollsterTickActor
 import com.flashboomlet.actors.TwitterTickActor
-import com.flashboomlet.preproccessing.DateUtil
 import com.flashboomlet.scavenger.articles.nyt.NewYorkTimesScavenger
 import com.flashboomlet.scavenger.polls.PollsterScavenger
 import com.flashboomlet.scavenger.twitter.TweetScavenger
@@ -51,6 +50,7 @@ object Driver extends LazyLogging {
     databaseDriver.populateEntities(entities)
 
     configureScheduler()
+
   }
 
   /**

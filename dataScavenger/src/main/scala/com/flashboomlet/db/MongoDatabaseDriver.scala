@@ -9,12 +9,10 @@ import com.flashboomlet.data.models.NewYorkTimesArticle
 import com.flashboomlet.data.models.TwitterSearch
 import com.flashboomlet.db.implicits.MongoImplicits
 import com.typesafe.scalalogging.LazyLogging
-import reactivemongo.api.BSONSerializationPack.Reader
 import reactivemongo.api.BSONSerializationPack.Writer
 import reactivemongo.api.MongoDriver
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
 
@@ -306,7 +304,9 @@ class MongoDatabaseDriver
     }
 
     coll.insert(writer.write(document).add(GlobalConstants.IdString -> id)).onComplete {
-      case Failure(e) => throw e // we fucked up
+      case Failure(e) =>
+        logger.error(s"Failed to insert and create new id into $coll")
+        throw e// we fucked up
       case Success(writeResult) => // logging needed we won
     }
     newId

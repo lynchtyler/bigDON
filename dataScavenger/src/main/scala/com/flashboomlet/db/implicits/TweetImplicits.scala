@@ -35,8 +35,8 @@ trait TweetImplicits
         TwitterConstants.FavoriteCountString -> BSONInteger(tweet.favoriteCount),
         TwitterConstants.CountryString -> BSONString(tweet.country),
         TwitterConstants.RetweetCountString -> BSONLong(tweet.retweetCount),
-        TwitterConstants.MetaDataString -> BSONArray(tweet.metaDatas),
-        TwitterConstants.PreprocessDataString -> tweet.preprocessData
+        GlobalConstants.MetaDatasString -> BSONArray(tweet.metaDatas),
+        GlobalConstants.PreprocessDataString -> tweet.preprocessData
       )
     }
   }
