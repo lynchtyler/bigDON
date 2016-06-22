@@ -1,6 +1,7 @@
 package com.flashboomlet.db
 
 import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.BSONInteger
 import reactivemongo.bson.BSONString
 import reactivemongo.bson.BSONValue
 
@@ -17,18 +18,18 @@ object MongoUtil {
     *            and values
     * @return mapped [[reactivemongo.bson.BSONDocument]] with all keys and values as [[String]]s
     */
-  def bsonDocumentToMap(doc: BSONDocument): Map[String, String] = {
-    // convert (String, BSONValue) to (String, String)
-    val pairs = doc.elements.toSeq.map { (t: (String, BSONValue)) =>
+  def bsonDocumentToMap(doc: BSONDocument): Map[String, Int] = {
+    // convert (String, BSONValue) to (String, Int)
+    val pairs: Seq[(String, Int)] = doc.elements.map { (t: (String, BSONValue)) =>
       (t._1,
       t._2 match {
-        case (x: BSONString) => x.value
-        case _ => ""
+        case (x: BSONInteger) => x.value
+        case _ => 0
       })
     }
 
-    pairs.foldLeft[Map[String, String]](Map()) { (acc: Map[String, String], kv: (String, String)) =>
-      acc + kv
+    pairs.foldLeft[Map[String, Int]](Map[String, Int]()) {
+      (acc: Map[String, Int], kv: (String, Int)) => acc + kv
     }
   }
 
@@ -40,9 +41,9 @@ object MongoUtil {
     *                [[reactivemongo.bson.BSONDocument]]
     * @return The newly created [[reactivemongo.bson.BSONDocument]]
     */
-  def mapToBSONDocument(attrMap: Map[String, Any]): BSONDocument = {
-    attrMap.foldLeft[BSONDocument](BSONDocument()) { (doc: BSONDocument, kv: (String, Any)) =>
-      doc.add(kv._1 -> BSONString(kv._2.toString))
+  def mapToBSONDocument(attrMap: Map[String, Int]): BSONDocument = {
+    attrMap.foldLeft[BSONDocument](BSONDocument()) { (doc: BSONDocument, kv: (String, Int)) =>
+      doc.add(kv._1 -> BSONInteger(kv._2))
     }
   }
 

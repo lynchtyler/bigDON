@@ -100,7 +100,7 @@ object CountUtil {
       sentenceCount = sentenceCount(content),
       titleWordCount = wordCount(title),
       searchTermCount = searchTermCount(occurrences, searchTerm),
-      wordOccurrences = occurrences
+      wordOccurrences = topTen
     )
   }
 

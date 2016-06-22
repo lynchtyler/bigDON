@@ -1,5 +1,6 @@
 package com.flashboomlet.scavenger.twitter
 
+import java.text.Normalizer
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -53,6 +54,8 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
   val client = new TwitterClient(twitterConfiguration.getConsumerToken,
     twitterConfiguration.getAccessToken)
 
+  private[this] val PolitenessDelay: Int = 1000
+
 
   /**
     * Scaffold for the scavengerTrait
@@ -66,13 +69,18 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
         Try {
           val twitterSearch: TwitterSearch = getTweetSearchSinceId(query, entity.lastName)
           // In the future Search using: searchTweetsFrom(query, sinceID)
+          Thread.sleep(PolitenessDelay) // TODO: calculate based on query rate
           searchTweetsFrom(
             query = query,
             sinceID = Some(twitterSearch.recentTwitterId),
             entityLastName = entity.lastName)
           .foreach { tweets =>
             tweets.foreach { (tweet: Tweet) =>
-              getAndInsertFinalTweet(tweet, query, today)
+              getAndInsertFinalTweet(
+                tweet = tweet,
+                entityLastName = entity.lastName,
+                query = query,
+                today = today)
             }
           }
           db.updateTwitterSearch(twitterSearch)
@@ -117,15 +125,16 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     */
   private def getMetaData(
     today: String,
+    entityLastName: String,
     tweetDate: Date,
     query: String): MetaData = {
 
       MetaData(
         fetchDate = today,
         publishDate = tweetDate.toString,
-        source = "Twiiter",
+        source = "Twitter",
         searchTerm = query,
-        entityLastName = "", // TODO
+        entityLastName = "",
         contributions = 0
       )
   }
@@ -141,20 +150,26 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
   private def getAndInsertFinalTweet(
       tweet: Tweet,
       query: String,
+      entityLastName: String,
       today: String): Unit = {
-    val metaData = getMetaData(today, tweet.created_at, query)
+
+    val metaData = getMetaData(
+      today = today,
+      entityLastName = entityLastName,
+      tweetDate = tweet.created_at,
+      query = query)
 
     if (db.tweetExists(tweet.id)) {
       db.addTweetMetaData(tweet.id, metaData)
     } else {
-      val sentiment = FastSentimentClassifier.getSentiment(tweet.text)
-      val counts = countContent("", tweet.text, query)
+      val cleanText = flattenToAscii(tweet.text)
+      val sentiment = FastSentimentClassifier.getSentiment(cleanText)
+      val counts = countContent("", cleanText, query)
       val preprocessData = PreprocessData(sentiment, counts)
-
 
       val finalTweet = FinalTweet(
         tweetID = tweet.id,
-        content = tweet.text,
+        content = cleanText,
         followersCount = tweet.user.get.followers_count,
         friendsCount = tweet.user.get.friends_count,
         userID = tweet.user.get.id,
@@ -171,6 +186,31 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
       )
       db.insertTweet(finalTweet)
     }
+  }
+
+  /**
+    * Normalizes a string to ascii while preserving the non ascii characters as their closest
+    * normalized latin relative.
+    *
+    * Algorithm is from :
+    * http://stackoverflow.com/
+    * questions/3322152/
+    * is-there-a-way-to-get-rid-of-accents-and-convert-a-whole-string-to-regular-lette/
+    * 15191508#15191508
+    *
+    * @param dirty string to clean up
+    * @return cleaned string
+    */
+  private[this] def flattenToAscii(dirty: String): String = {
+    val out: Array[Char] = new Array(dirty.length())
+    val normalizedString = Normalizer.normalize(dirty, Normalizer.Form.NFD)
+    (0 until normalizedString.length).filter { n =>
+      normalizedString.charAt(n) <= '\u007F'
+    }.zipWithIndex.foreach((t: (Int, Int)) =>
+      out(t._2) = normalizedString.charAt(t._1)
+    )
+    val clean = new String(out)
+    clean.replaceFirst("^RT @[^:]+:\\s+", "")
   }
 
   /**

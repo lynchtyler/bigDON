@@ -174,12 +174,6 @@ trait MongoConstants {
 
     /* String constant for the 'retweetCount' field in a MongoDB Counts document */
     final val RetweetCountString = "retweet_count"
-
-    /* String constant for the 'metaData' field in a MongoDB Counts document */
-    final val MetaDataString = "meta_data"
-
-    /* String constant for the 'preprocessData' field in a MongoDB Counts document */
-    final val PreprocessDataString = "preprocess_cata"
   }
 
   object TwitterSearchConstants {
