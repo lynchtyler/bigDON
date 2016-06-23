@@ -1,6 +1,8 @@
 package com.flashboomlet.db
 
 import com.flashboomlet.data.MongoConstants
+import com.flashboomlet.data.MongoConstants
+import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.PollsterDataPoint
 import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.FinalTweet
@@ -13,6 +15,7 @@ import reactivemongo.api.BSONSerializationPack.Writer
 import reactivemongo.api.MongoDriver
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.UpdateWriteResult
+import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
 
@@ -109,6 +112,12 @@ class MongoDatabaseDriver
     insert(article, newYorkTimesArticlesCollection)
   }
 
+  /**
+    * Adds a metadata to a nyt article
+    *
+    * @param url url indicating unqiueness of article
+    * @param metaData metadata to add to unique article
+    */
   def addNytMetaData(url: String, metaData: MetaData): Unit = {
     val selector = BSONDocument(NYTArticleConstants.UrlString -> url)
 
@@ -157,15 +166,29 @@ class MongoDatabaseDriver
     Await.result(future, Duration.Inf)
   }
 
+  /**
+    * Determines if a NYT article is a duplicate (i.e it has the same url as one in the DB, which
+    * was also found with the same search term for a given entity.
+    *
+    * @param url unique url related to article
+    * @param query search term that retrieved article
+    * @param entityLastName entity being searched
+    * @return true if all 3 critery match in DB else false
+    */
   def isNytDuplicate(url: String, query: String, entityLastName: String): Boolean = {
     val future = newYorkTimesArticlesCollection
       .find(BSONDocument(
         NYTArticleConstants.UrlString -> url,
-        GlobalConstants.MetaDatasString -> BSONDocument(
-          MetaDataConstants.SearchTermString -> query,
-          MetaDataConstants.EntityLastNameString -> entityLastName
-        )))
-      .cursor[BSONDocument]().collect[List]()
+        GlobalConstants.MetaDatasString ->
+          BSONDocument(GlobalConstants.ElemMatchString ->
+            BSONDocument(
+              MetaDataConstants.EntityLastNameString -> entityLastName,
+              MetaDataConstants.SearchTermString -> query
+            )
+          )
+        )
+      )
+      .cursor[NewYorkTimesArticle]().collect[List]()
       .map(list => list.nonEmpty)
 
     Await.result(future, Duration.Inf)
@@ -224,20 +247,40 @@ class MongoDatabaseDriver
     twitterSearchesCollection.update(selector, modifier)
   }
 
+  /**
+    * Determines if a tweet is a duplicate (i.e has some tweet id, and was found via the same
+    * search term for a given entity.
+    *
+    * @param query search term that found this tweet
+    * @param entityLastName entity being searched
+    * @param tweetId tweet id identifying the tweet in question
+    * @return true if tweet exists matching all 3 data
+    */
   def isTweetDuplicate(query: String, entityLastName: String, tweetId: Long): Boolean = {
     val future = tweetsCollection.find(BSONDocument(
       TwitterConstants.TweetIDString -> tweetId,
-      GlobalConstants.MetaDatasString -> BSONDocument(
-        MetaDataConstants.SearchTermString -> query,
-        MetaDataConstants.EntityLastNameString -> entityLastName
-      )))
-      .cursor[FinalTweet]()
-      .collect[List]()
-      .map(list => list.nonEmpty)
+      GlobalConstants.MetaDatasString ->
+        BSONDocument(GlobalConstants.ElemMatchString ->
+          BSONDocument(
+            MetaDataConstants.EntityLastNameString -> entityLastName,
+            MetaDataConstants.SearchTermString -> query
+          )
+        )
+      )
+    )
+    .cursor[FinalTweet]()
+    .collect[List]()
+    .map(list => list.nonEmpty)
 
     Await.result(future, Duration.Inf)
   }
 
+  /**
+    * Determines if we have already stored a tweet with a tweet id
+    *
+    * @param tweetId tweet id to determine if exists in db
+    * @return true if tween found with tweet id else false
+    */
   def tweetExists(tweetId: Long): Boolean = {
     val future = tweetsCollection.find(BSONDocument(TwitterConstants.TweetIDString -> tweetId))
       .cursor[FinalTweet]()
@@ -247,6 +290,12 @@ class MongoDatabaseDriver
     Await.result(future, Duration.Inf)
   }
 
+  /**
+    * Adds a metadata object to the sequence of metadatas associated with the tweet id
+    *
+    * @param tweeId tweet id identifying tweet to add metadata to
+    * @param metaData metadata to add
+    */
   def addTweetMetaData(tweeId: Long, metaData: MetaData): Unit = {
     val selector = BSONDocument(TwitterConstants.TweetIDString -> tweeId)
 

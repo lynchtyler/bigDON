@@ -35,7 +35,7 @@ trait TweetImplicits
         TwitterConstants.FavoriteCountString -> BSONInteger(tweet.favoriteCount),
         TwitterConstants.CountryString -> BSONString(tweet.country),
         TwitterConstants.RetweetCountString -> BSONLong(tweet.retweetCount),
-        GlobalConstants.MetaDatasString -> BSONArray(tweet.metaDatas),
+        GlobalConstants.MetaDatasString -> tweet.metaDatas,
         GlobalConstants.PreprocessDataString -> tweet.preprocessData
       )
     }
@@ -55,10 +55,7 @@ trait TweetImplicits
       val favoriteCount = doc.getAs[Int](TwitterConstants.FavoriteCountString).get
       val country = doc.getAs[String](TwitterConstants.CountryString).get
       val retweetCount = doc.getAs[Long](TwitterConstants.RetweetCountString).get
-      val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString) match {
-        case Some(m) => m
-        case None => Set[MetaData]()
-      }
+      val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString).get
       val preprocessData = doc.getAs[PreprocessData](GlobalConstants.PreprocessDataString).get
 
       FinalTweet(

@@ -46,18 +46,4 @@ object MongoUtil {
       doc.add(kv._1 -> BSONInteger(kv._2))
     }
   }
-
-  def getOptionalString(option: Option[String]): String = {
-    option match {
-      case Some(s) => s
-      case None => ""
-    }
-  }
-
-  def getOptionalSet(option: Option[Set[String]]): Set[String] = {
-    option match {
-      case Some(s) => s
-      case None => Set()
-    }
-  }
 }

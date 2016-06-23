@@ -1,6 +1,7 @@
 package com.flashboomlet.scavenger.articles.nyt
 
 import java.net.URL
+import java.text.Normalizer
 import java.util.Date
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -45,9 +46,9 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
 
   private[this] val OKResponseString: String = "OK"
 
-  private[this] val PolitenessDelay: Int = 20000
+  private[this] val PolitenessDelay: Int = 5000
 
-  private[this] val TimeoutAllowed = 5000
+  private[this] val TimeoutAllowed = 60000
 
 
   /**
@@ -66,7 +67,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
            entityLastName = entity.lastName,
            beginDate = todayStringQuery,
            endDate = todayStringQuery)
-         logger.info(s"Successfully scaveneged articles for ${entity.lastName} : $term")
+         logger.info(s"Successfully scavenged articles for ${entity.lastName} : $term")
        }.getOrElse(
          logger.error("Failed to scavenge Articles")
        )

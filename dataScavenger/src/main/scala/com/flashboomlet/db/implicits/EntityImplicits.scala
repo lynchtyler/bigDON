@@ -18,7 +18,7 @@ trait EntityImplicits extends MongoConstants {
       EntityConstants.FirstNameString -> BSONString(entity.firstName),
       EntityConstants.LastNameString -> BSONString(entity.lastName),
       EntityConstants.PartyString -> BSONString(entity.party),
-      EntityConstants.SearchTermsString -> BSONArray(entity.searchTerms)
+      EntityConstants.SearchTermsString -> entity.searchTerms
     )
   }
 
@@ -29,10 +29,7 @@ trait EntityImplicits extends MongoConstants {
       val firstName = doc.getAs[String](EntityConstants.FirstNameString).get
       val lastName = doc.getAs[String](EntityConstants.LastNameString).get
       val party = doc.getAs[String](EntityConstants.PartyString).get
-      val searchTerms = doc.getAs[Set[String]](EntityConstants.SearchTermsString) match {
-        case Some(st) => st
-        case None => Set[String]()
-      }
+      val searchTerms = doc.getAs[Set[String]](EntityConstants.SearchTermsString).getOrElse(Set())
 
       Entity(
         firstName = firstName,

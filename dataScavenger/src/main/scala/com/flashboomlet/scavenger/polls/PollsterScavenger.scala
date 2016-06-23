@@ -43,8 +43,8 @@ class PollsterScavenger(implicit val mapper: ObjectMapper,
         fetchDate = today,
         publishDate = today,
         source = "Pollster",
-        searchTerm = "",
-        entityLastName = "", // TODO
+        searchTerm = "N/A",
+        entityLastName = "N/A", // TODO
         contributions = chart.poll_count.toInt
       )
       // Convert Chart Response to Chart Model
