@@ -215,7 +215,7 @@ trait MongoConstants {
     */
   object GlobalConstants {
 
-    /* String constant for the `meta_data` field in a MongoDB document */
+    /* String constant for the `meta_datas` field in a MongoDB document */
     final val MetaDatasString = "meta_datas"
 
     /* String constant for the `preprocess_data` field in a MongoDB document */
@@ -225,5 +225,7 @@ trait MongoConstants {
     final val IdString = "_id"
 
     final val SetString = "$set"
+
+    final val ElemMatchString = "$elemMatch"
   }
 }

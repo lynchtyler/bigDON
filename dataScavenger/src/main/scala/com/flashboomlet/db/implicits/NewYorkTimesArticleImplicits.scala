@@ -26,10 +26,10 @@ trait NewYorkTimesArticleImplicits
         NYTArticleConstants.UrlString -> BSONString(nytArticle.url),
         NYTArticleConstants.AuthorString -> BSONString(nytArticle.author),
         NYTArticleConstants.TitleString -> BSONString(nytArticle.title),
-        NYTArticleConstants.SummariesString -> BSONArray(nytArticle.summaries),
-        NYTArticleConstants.KeyPeopleString -> BSONArray(nytArticle.keyPeople),
+        NYTArticleConstants.SummariesString -> nytArticle.summaries,
+        NYTArticleConstants.KeyPeopleString -> nytArticle.keyPeople,
         NYTArticleConstants.BodyString -> BSONString(nytArticle.body),
-        GlobalConstants.MetaDatasString -> BSONArray(nytArticle.metaDatas),
+        GlobalConstants.MetaDatasString -> nytArticle.metaDatas,
         GlobalConstants.PreprocessDataString -> nytArticle.preprocessData
       )
     }
@@ -40,23 +40,20 @@ trait NewYorkTimesArticleImplicits
 
     override def read(doc: BSONDocument): NewYorkTimesArticle = {
       val url = doc.getAs[String](NYTArticleConstants.UrlString).get
-      val author = doc.getAs[String](NYTArticleConstants.AuthorString)
-      val title = doc.getAs[String](NYTArticleConstants.TitleString)
-      val summaries = doc.getAs[Set[String]](NYTArticleConstants.SummariesString)
-      val keyPeople = doc.getAs[Set[String]](NYTArticleConstants.KeyPeopleString)
+      val author = doc.getAs[String](NYTArticleConstants.AuthorString).getOrElse("")
+      val title = doc.getAs[String](NYTArticleConstants.TitleString).getOrElse("")
+      val summaries = doc.getAs[Set[String]](NYTArticleConstants.SummariesString).getOrElse(Set())
+      val keyPeople = doc.getAs[Set[String]](NYTArticleConstants.KeyPeopleString).getOrElse(Set())
       val body = doc.getAs[String](NYTArticleConstants.BodyString).get
-      val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString) match {
-        case Some(m) => m
-        case None => Set[MetaData]()
-      }
+      val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString).get
       val preprocessData = doc.getAs[PreprocessData](GlobalConstants.PreprocessDataString).get
 
       NewYorkTimesArticle(
         url = url,
-        author = MongoUtil.getOptionalString(author),
-        title = MongoUtil.getOptionalString(title),
-        summaries = MongoUtil.getOptionalSet(summaries),
-        keyPeople = MongoUtil.getOptionalSet(keyPeople),
+        author = author,
+        title = title,
+        summaries = summaries,
+        keyPeople = keyPeople,
         body = body,
         metaDatas = metaData,
         preprocessData = preprocessData

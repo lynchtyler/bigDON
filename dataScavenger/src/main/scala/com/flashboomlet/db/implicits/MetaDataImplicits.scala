@@ -31,20 +31,17 @@ trait MetaDataImplicits extends MongoConstants {
     override def read(doc: BSONDocument): MetaData = {
       val fetchDate = doc.getAs[String](MetaDataConstants.FetchDateString).get
       val publishDate = doc.getAs[String](MetaDataConstants.PublishDateString).get
-      val source = doc.getAs[String](MetaDataConstants.SourceString)
-      val searchTerm = doc.getAs[String](MetaDataConstants.SearchTermString)
-      val entityLastName = doc.getAs[String](MetaDataConstants.EntityLastNameString)
-      val contributions = doc.getAs[Int](MetaDataConstants.ContributionsString) match {
-        case Some(c) => c
-        case None => 0
-      }
+      val source = doc.getAs[String](MetaDataConstants.SourceString).get
+      val searchTerm = doc.getAs[String](MetaDataConstants.SearchTermString).get
+      val entityLastName = doc.getAs[String](MetaDataConstants.EntityLastNameString).get
+      val contributions = doc.getAs[Int](MetaDataConstants.ContributionsString).getOrElse(0)
 
       MetaData(
         fetchDate = fetchDate,
         publishDate = publishDate,
-        source = MongoUtil.getOptionalString(source),
-        searchTerm = MongoUtil.getOptionalString(searchTerm),
-        entityLastName = MongoUtil.getOptionalString(entityLastName),
+        source = source,
+        searchTerm = searchTerm,
+        entityLastName = entityLastName,
         contributions = contributions
       )
     }
