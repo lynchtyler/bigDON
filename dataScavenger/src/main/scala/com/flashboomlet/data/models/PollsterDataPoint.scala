@@ -10,7 +10,7 @@ package com.flashboomlet.data.models
   * @param undecided the value for undecided
   */
 case class PollsterDataPoint(
-  date: String,
+  date: Long,
   clinton: Double,
   trump: Double,
   other: Double,

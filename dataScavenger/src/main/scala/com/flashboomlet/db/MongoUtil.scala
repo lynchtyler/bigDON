@@ -2,7 +2,6 @@ package com.flashboomlet.db
 
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONInteger
-import reactivemongo.bson.BSONString
 import reactivemongo.bson.BSONValue
 
 /**

@@ -1,8 +1,10 @@
 package com.flashboomlet.db.implicits
 
-import com.flashboomlet.data.MongoConstants
+import java.util.Date
+
 import com.flashboomlet.data.models.MetaData
-import com.flashboomlet.db.MongoUtil
+import com.flashboomlet.db.MongoConstants
+import reactivemongo.bson.BSONDateTime
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
@@ -16,8 +18,8 @@ trait MetaDataImplicits extends MongoConstants {
   implicit object MetaDataWriter extends BSONDocumentWriter[MetaData] {
 
     override def write(metaData: MetaData): BSONDocument = BSONDocument(
-      MetaDataConstants.FetchDateString -> BSONString(metaData.fetchDate),
-      MetaDataConstants.PublishDateString -> BSONString(metaData.publishDate),
+      MetaDataConstants.FetchDateString -> BSONDateTime(metaData.fetchDate),
+      MetaDataConstants.PublishDateString -> BSONDateTime(metaData.publishDate),
       MetaDataConstants.SourceString -> BSONString(metaData.source),
       MetaDataConstants.SearchTermString -> BSONString(metaData.searchTerm),
       MetaDataConstants.EntityLastNameString -> BSONString(metaData.entityLastName),
@@ -29,8 +31,8 @@ trait MetaDataImplicits extends MongoConstants {
   implicit object MetaDataReader extends BSONDocumentReader[MetaData] {
 
     override def read(doc: BSONDocument): MetaData = {
-      val fetchDate = doc.getAs[String](MetaDataConstants.FetchDateString).get
-      val publishDate = doc.getAs[String](MetaDataConstants.PublishDateString).get
+      val fetchDate = doc.getAs[Date](MetaDataConstants.FetchDateString).get.getTime
+      val publishDate = doc.getAs[Date](MetaDataConstants.PublishDateString).get.getTime
       val source = doc.getAs[String](MetaDataConstants.SourceString).get
       val searchTerm = doc.getAs[String](MetaDataConstants.SearchTermString).get
       val entityLastName = doc.getAs[String](MetaDataConstants.EntityLastNameString).get

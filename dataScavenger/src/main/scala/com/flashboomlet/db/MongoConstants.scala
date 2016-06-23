@@ -1,4 +1,4 @@
-package com.flashboomlet.data
+package com.flashboomlet.db
 
 
 trait MongoConstants {

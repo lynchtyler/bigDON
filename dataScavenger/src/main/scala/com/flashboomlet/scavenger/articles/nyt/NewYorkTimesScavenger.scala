@@ -1,8 +1,6 @@
 package com.flashboomlet.scavenger.articles.nyt
 
 import java.net.URL
-import java.text.Normalizer
-import java.util.Date
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.scavenger.errors.SearchError
@@ -16,7 +14,6 @@ import com.flashboomlet.data.models.PreprocessData
 import com.flashboomlet.preproccessing.FastSentimentClassifier
 import com.flashboomlet.preproccessing.CountUtil.countContent
 import com.flashboomlet.preproccessing.DateUtil
-import com.flashboomlet.preproccessing.DateUtil.getToday
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
@@ -57,7 +54,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
   def scavenge(entities: Set[Entity]): Unit = {
    // entities foreach search terms foreach scavengeArticles(searchterms, today, today)
 
-   val todayStringQuery = DateUtil.getNytToday()
+   val todayStringQuery = DateUtil.getNytToday
    entities.foreach { entity =>
      entity.searchTerms.foreach { term =>
        Try {
@@ -118,7 +115,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
       val articleBody: String = htmlDoc.getElementsByClass("story-body-text").text()
       Try {
         val metaData: MetaData = MetaData(
-          fetchDate = getToday(),
+          fetchDate = article.fetchDate,
           publishDate = article.publishDate,
           source = article.source,
           searchTerm = query,
@@ -149,7 +146,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
           logger.info(s"Successfully inserted article ${article.url}")
         }
       }.getOrElse(logger.error(s"Failed to create and insert NYT article: $query : ${article.url}"))
-    }.getOrElse(logger.error(s"Failed to Parse article ${query} + ${article.url}"))
+    }.getOrElse(logger.error(s"Failed to Parse article $query + ${article.url}"))
   }
 
   /**
@@ -232,8 +229,8 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
           title = getString(doc.headline.main),
           subjects = Set(getString(doc.section_name), getString(doc.subsection_name)),
           summaries = Set(getString(doc.snippet), getString(doc.lead_paragraph)),
-          publishDate = getString(doc.pub_date),
-          fetchDate = new Date().toString,
+          publishDate = DateUtil.getNytInMillis(getString(doc.pub_date)),
+          fetchDate = DateUtil.getNowInMillis,
           source = getString(doc.source),
           author = getAuthorFromByLine(doc.byline),
           keyPeople = Set(getContributorsFromByLine(doc.byline)),
