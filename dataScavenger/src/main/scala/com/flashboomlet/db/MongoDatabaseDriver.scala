@@ -1,8 +1,5 @@
 package com.flashboomlet.db
 
-import com.flashboomlet.data.MongoConstants
-import com.flashboomlet.data.MongoConstants
-import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.PollsterDataPoint
 import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.FinalTweet
@@ -15,7 +12,7 @@ import reactivemongo.api.BSONSerializationPack.Writer
 import reactivemongo.api.MongoDriver
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.BSONArray
+import reactivemongo.bson.BSONDateTime
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
 
@@ -200,9 +197,9 @@ class MongoDatabaseDriver
     * @param date The data to be assessed for uniqueness in the database
     * @return true if the date exists in an pollster in the database, else false
     */
-  def pollsterDataPointExists(date: String): Boolean = {
+  def pollsterDataPointExists(date: Long): Boolean = {
     val future =  pollsterDataPointsCollection
-      .find(BSONDocument(PollsterDataPointConstants.DateString -> date))
+      .find(BSONDocument(PollsterDataPointConstants.DateString -> BSONDateTime(date)))
       .cursor[BSONDocument]().collect[List]()
       .map(list => list.nonEmpty)
 

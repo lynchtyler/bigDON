@@ -24,8 +24,8 @@ case class PrefetchArticle(
   title: String,
   subjects: Set[String] = Set(),
   summaries: Set[String] = Set(),
-  publishDate: String, // for now, may be more specific type in future
-  fetchDate: String,
+  publishDate: Long,
+  fetchDate: Long,
   source: String,
   author: String,
   keyPeople: Set[String] = Set(),

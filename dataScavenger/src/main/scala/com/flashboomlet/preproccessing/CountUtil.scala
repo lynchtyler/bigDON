@@ -67,15 +67,15 @@ object CountUtil {
   /**
     * The Count of the Search term words
     *
-    * @param occurrences
-    * @param searchTerms
-    * @return
+    * @param occurrences mapping of words to frequencies
+    * @param searchTerm search terms
+    * @return number of search terms
     */
   private def searchTermCount(
     occurrences: Map[String, Int],
-    searchTerms: String): Int = {
+    searchTerm: String): Int = {
     occurrences.filterKeys(word =>
-      searchTerms.contains(word)
+      searchTerm.contains(word)
     ).foldLeft(0)(_ + _._2)
   }
 

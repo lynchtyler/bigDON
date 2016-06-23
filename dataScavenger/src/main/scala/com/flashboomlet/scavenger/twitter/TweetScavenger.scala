@@ -1,7 +1,6 @@
 package com.flashboomlet.scavenger.twitter
 
 import java.text.Normalizer
-import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.flashboomlet.data.models.MetaData
@@ -11,7 +10,6 @@ import com.danielasfregola.twitter4s.entities.StatusSearch
 import com.danielasfregola.twitter4s.entities.Tweet
 import com.danielasfregola.twitter4s.entities.enums.Language
 import com.danielasfregola.twitter4s.entities.enums.ResultType
-import com.danielasfregola.twitter4s.http.unmarshalling.CustomSerializers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.PreprocessData
@@ -19,12 +17,10 @@ import com.flashboomlet.data.models.FinalTweet
 import com.flashboomlet.data.models.TwitterSearch
 import com.flashboomlet.db.MongoDatabaseDriver
 import com.flashboomlet.preproccessing.CountUtil.countContent
-import com.flashboomlet.preproccessing.DateUtil.getToday
+import com.flashboomlet.preproccessing.DateUtil
 import com.flashboomlet.scavenger.Scavenger
 import com.flashboomlet.scavenger.twitter.configuration.TwitterConfiguration
 import com.typesafe.scalalogging.LazyLogging
-import org.json4s.DefaultFormats
-import org.json4s.Formats
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -64,7 +60,6 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     // get highest ID for a given search parameter from entity
     entities.foreach { entity =>
       val searchTerms = entity.searchTerms
-      val today = getToday()
       searchTerms.foreach { query =>
         Try {
           val twitterSearch: TwitterSearch = getTweetSearchSinceId(query, entity.lastName)
@@ -79,14 +74,13 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
               getAndInsertFinalTweet(
                 tweet = tweet,
                 entityLastName = entity.lastName,
-                query = query,
-                today = today)
+                query = query)
             }
           }
           db.updateTwitterSearch(twitterSearch)
-          logger.info(s"Successfully inserted tweets for ${entity.lastName}, ${query}")
+          logger.info(s"Successfully inserted tweets for ${entity.lastName}, $query")
         }.getOrElse(
-          logger.error(s"Failed to fetch and inserts tweets for query: ${query}")
+          logger.error(s"Failed to fetch and inserts tweets for query: $query")
         )
       }
     }
@@ -118,20 +112,18 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
   /**
     * Creates the metaData object for the tweet
     *
-    * @param today today's date
     * @param tweetDate the date of the tweet
     * @param query the query that got the tweet
     * @return a metaData object
     */
   private def getMetaData(
-    today: String,
     entityLastName: String,
     tweetDate: Date,
     query: String): MetaData = {
 
       MetaData(
-        fetchDate = today,
-        publishDate = tweetDate.toString,
+        fetchDate = DateUtil.getNowInMillis,
+        publishDate = DateUtil.getTweetInMillis(tweetDate),
         source = "Twitter",
         searchTerm = query,
         entityLastName = entityLastName,
@@ -144,17 +136,14 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     *
     * @param tweet the tweet to convert into a final object
     * @param query the query that got the tweet
-    * @param today today's date
     * @return a finalTweet object
     */
   private def getAndInsertFinalTweet(
       tweet: Tweet,
       query: String,
-      entityLastName: String,
-      today: String): Unit = {
+      entityLastName: String): Unit = {
 
     val metaData = getMetaData(
-      today = today,
       entityLastName = entityLastName,
       tweetDate = tweet.created_at,
       query = query)
@@ -213,27 +202,6 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     clean.replaceFirst("^RT @[^:]+:\\s+", "")
   }
 
-  /**
-    * getUserTimelineFor is a general function to search the top 100 tweets of a sepcific users
-    *   timeline
-    *
-    * This is a simple request the top 100 tweets and bam!
-    *
-    * @param ID
-    * @param tweetCount
-    * @param maxID
-    * @return
-    */
-  private def getUserTimelineFor(
-    ID: Long,
-    tweetCount: Integer = count,
-    maxID: Option[Long] = None): Future[Seq[Tweet]] =  {
-
-    client.getUserTimelineForUserId(
-    user_id = ID,
-    count = tweetCount,
-    max_id = maxID)
-  }
 
   /**
     * searchForNTweets is a general function to search tweets based on specific needs.
@@ -272,7 +240,6 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     * @return a single tweet in the Final Tweet Format
     */
   private def getRecentTweet(query: String): Long = {
-    val today = getToday()
     val future = client.searchTweet(
       query = query,
       count = 1,
@@ -284,20 +251,6 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
     }
     Await.result(future, Duration.Inf)
   }
-
-  private implicit def json4sFormats: Formats = defaultFormats ++ CustomSerializers.all
-
-  /**
-    * Formatter for dates, specifically used for JSON formatting
-    */
-  private val defaultFormats = new DefaultFormats {
-    override def dateFormatter = {
-      val simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZ yyyy")
-      simpleDateFormat
-    }
-  }
-
-  private[this] def getString(field: String): String = Option(field).getOrElse("")
 }
 
 /** Companion object with a constructor that retrieves configurations */

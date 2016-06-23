@@ -66,8 +66,8 @@ case class Estimates (
 /**
   * Case class for the Estimates By Date's
   *
-  * @param date
-  * @param estimates
+  * @param date date of point
+  * @param estimates esitmates
   */
 case class Point (
   date: Date,
@@ -77,8 +77,8 @@ case class Point (
 /**
   * Case class for the DataPoint's
   *
-  * @param choice
-  * @param value
+  * @param choice choice
+  * @param value value
   */
 case class DataPoint (
   choice: String,

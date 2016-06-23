@@ -3,8 +3,6 @@ package com.flashboomlet.preproccessing
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.data.models.Sentiment
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scalaj.http.Http
 
 
@@ -22,9 +20,6 @@ object FastSentimentClassifier {
     */
   def getSentiment(text: String)(implicit mapper: ObjectMapper): Sentiment = {
     val request = Http(RequestLocation).postForm(Seq("txt" -> text)).asString.body
-
-    mapper.readValue(
-      request,
-      classOf[Sentiment])
+    mapper.readValue(request,classOf[Sentiment])
   }
 }

@@ -5,7 +5,7 @@ import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.data.models.PollsterDataPoint
 import com.flashboomlet.db.MongoDatabaseDriver
-import com.flashboomlet.preproccessing.DateUtil.getToday
+import com.flashboomlet.preproccessing.DateUtil
 import com.flashboomlet.scavenger.Scavenger
 import com.typesafe.scalalogging.LazyLogging
 
@@ -36,7 +36,7 @@ class PollsterScavenger(implicit val mapper: ObjectMapper,
     Try {
       // Scavenge Chart
       val chart = scavengeChart()
-      val today = getToday()
+      val today = DateUtil.getNowInMillis
       val estimates = chart.estimates_by_date
       // Metadata
       val metaData = MetaData(
@@ -49,8 +49,8 @@ class PollsterScavenger(implicit val mapper: ObjectMapper,
       )
       // Convert Chart Response to Chart Model
       val finalChart: List[PollsterDataPoint] = estimates.map { day =>
-        com.flashboomlet.data.models.PollsterDataPoint(
-          date = day.date.toString,
+        PollsterDataPoint(
+          date = DateUtil.getPollsterInMillis(day.date),
           clinton = day.estimates(ClintonIndex).value,
           trump = day.estimates(TrumpIndex).value,
           other = day.estimates(OtherIndex).value,
@@ -77,7 +77,7 @@ class PollsterScavenger(implicit val mapper: ObjectMapper,
 
     val request: HttpRequest = Http(BaseApiPath + "/charts/" + query)
     val x = mapper.readValue(request.asBytes.body, classOf[Chart])
-    com.flashboomlet.scavenger.polls.Chart(
+    Chart(
       id = x.id,
       title = x.title,
       slug = x.slug,

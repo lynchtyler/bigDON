@@ -1,7 +1,7 @@
 package com.flashboomlet.db.implicits
 
-import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.TwitterSearch
+import com.flashboomlet.db.MongoConstants
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter

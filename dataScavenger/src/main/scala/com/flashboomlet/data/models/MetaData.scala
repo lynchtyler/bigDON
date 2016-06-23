@@ -11,8 +11,8 @@ package com.flashboomlet.data.models
   * @param contributions the contributions; Ex: Count of Authors, Count of Polls, etc...
   */
 case class MetaData(
-  fetchDate: String,
-  publishDate: String,
+  fetchDate: Long,
+  publishDate: Long,
   source: String,
   searchTerm: String,
   entityLastName: String,

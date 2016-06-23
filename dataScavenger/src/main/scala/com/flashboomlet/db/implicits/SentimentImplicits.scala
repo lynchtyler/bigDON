@@ -1,11 +1,10 @@
 package com.flashboomlet.db.implicits
 
-import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.Sentiment
+import com.flashboomlet.db.MongoConstants
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
-import reactivemongo.bson.BSONDouble
 import reactivemongo.bson.BSONString
 
 /** Implicit readers and writers for the Sentiment model in of MongoDB */

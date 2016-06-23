@@ -1,7 +1,7 @@
 package com.flashboomlet.db.implicits
 
-import com.flashboomlet.data.MongoConstants
 import com.flashboomlet.data.models.Counts
+import com.flashboomlet.db.MongoConstants
 import com.flashboomlet.db.MongoUtil
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
