@@ -1,7 +1,5 @@
 package com.flashboomlet.data
 
-import java.io.File
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.data.models.Entity
 
@@ -11,11 +9,10 @@ import com.flashboomlet.data.models.Entity
 object EntityFactory {
 
   def loadEntities()(implicit mapper: ObjectMapper): Set[Entity] = {
-    val resource = ClassLoader.getSystemClassLoader.getResource("entities.json")
+    val resource = EntityFactory.getClass.getClassLoader.getResourceAsStream("entities.json")
 
-    val file = new File(resource.toURI)
 
-    mapper.readValue(file, classOf[Entities]).entities
+    mapper.readValue(resource, classOf[Entities]).entities
   }
 
   private case class Entities(entities: Set[Entity])

@@ -1,8 +1,10 @@
+import sbt.Keys.javaOptions
+
 // scalastyle:off
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
-mainClass in (Compile, run) := Some("com.flashboomlet.fetching.Driver")
+mainClass in (Compile, run) := Some("com.flashboomlet.Driver")
 
 lazy val root =
   (project in file(".")).aggregate(
@@ -36,4 +38,5 @@ lazy val dataScavenger = (project in file ("dataScavenger"))
   .settings(commonSettings: _*)
   .settings(
     name := "dataScavenger",
-    version := "0.0.0")
+    version := "0.0.0",
+    javaOptions += "-Dlogback.configurationFile=../dataScavenger/src/main/resources/logback.xml")
