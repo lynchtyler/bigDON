@@ -6,7 +6,7 @@ trait MongoConstants {
   // DATABASE CONFIGURATION VALUES //
 
   /* String constant for connecting to MongoDB */
-  final val LocalHostString = "localhost"
+  final val DatabaseIp = "172.16.238.20"
 
   /* String constant for the database name */
   final val BigDonDatabaseString = "bigdon"

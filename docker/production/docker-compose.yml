@@ -1,0 +1,38 @@
+version: '2'
+
+services:
+  datascavenger:
+    image: com.flashboomlet/datascavenger
+    container_name: bigdon_scavenger
+    volumes:
+     - /srv/local/bigdon/logs/:/logs
+    networks:
+      bigdon_net:
+        ipv4_address: 172.16.238.30
+    depends_on:
+      - db
+      - sentiment
+
+  db:
+    image: mongo
+    container_name: bigdon_mongo
+    volumes:
+      - /srv/local/bigdon/data:/data/db
+    networks:
+      bigdon_net:
+        ipv4_address: 172.16.238.20
+
+  sentiment:
+    image: sentimentweb
+    container_name: bigdon_sentimentweb
+    networks:
+      bigdon_net:
+        ipv4_address: 172.16.238.10
+
+networks:
+  bigdon_net:
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+        gateway: 172.16.238.1
