@@ -166,14 +166,30 @@ trait MongoConstants {
     /* String constant for the 'screenName' field in a MongoDB Counts document */
     final val ScreenNameString = "screen_name"
 
-    /* String constant for the 'favoriteCount' field in a MongoDB Counts document */
-    final val FavoriteCountString = "favorite_count"
+    /* String constant for the 'social_datas' field in a MongoDB tweet document */
+    final val SocialDatasString = "social_datas"
 
     /* String constant for the 'country' field in a MongoDB Counts document */
     final val CountryString = "country"
 
-    /* String constant for the 'retweetCount' field in a MongoDB Counts document */
+    /* String constant for the 'is_retweet' field in a MongoDB tweet document */
+    final val IsRetweetString = "is_retweet"
+
+    /* String constant for the 'parent_tweet_id' field in a MongoDB tweet document */
+    final val ParentTweetIdString = "parent_tweet_id"
+  }
+
+
+  object TweetSocialDataConstants {
+
+    /* String constant for the 'retweet_count' field in a MongoDB Counts document */
     final val RetweetCountString = "retweet_count"
+
+    /* String constant for the 'favorite_count' field in a MongoDB Counts document */
+    final val FavoriteCountString = "favorite_count"
+
+    /* String constant for the 'fetch_date' field in a mongodb tweet social data document */
+    final val FetchedDateString = "fetched_date"
   }
 
   object TwitterSearchConstants {

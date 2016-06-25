@@ -5,8 +5,7 @@ package com.flashboomlet.data.models
   *
   * @param tweetID id of the tweet
   * @param content the contents of the tweet
-  * @param favoriteCount the amount of times the tweet was favorited at the time of harvest
-  * @param retweetCount the amount of times the tweet was retweeted at the time of harvest
+  * @param socialDatas the sequence of social data related to time
   * @param country is the country of where the tweet was tweeted from
   * @param userID the id of the user
   * @param followersCount the followers count that the user has
@@ -20,9 +19,10 @@ case class FinalTweet(
   userID: Long,
   name: String,
   screenName: String,
-  favoriteCount: Int,
   country: String,
-  retweetCount: Long,
+  isRetweet: Boolean,
+  parentTweetId: Long,
+  socialDatas: Set[TweetSocialData],
   metaDatas: Set[MetaData],
   preprocessData: PreprocessData
 )
