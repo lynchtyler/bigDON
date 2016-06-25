@@ -34,7 +34,7 @@ class MongoDatabaseDriver
 
   val driver = new MongoDriver()
 
-  val connection = driver.connection(List(LocalHostString))
+  val connection = driver.connection(List(DatabaseIp))
 
   val db = connection(BigDonDatabaseString)
 

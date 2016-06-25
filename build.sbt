@@ -30,13 +30,28 @@ lazy val commonSettings = Seq(
     "org.reactivemongo" %% "reactivemongo" % "0.11.13",
     "ch.qos.logback"  %  "logback-classic" % "1.1.3",
     "org.slf4j" %  "slf4j-api" % "1.7.14",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
-  )
-)
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"))
 
 lazy val dataScavenger = (project in file ("dataScavenger"))
   .settings(commonSettings: _*)
   .settings(
     name := "dataScavenger",
     version := "0.0.0",
-    javaOptions += "-Dlogback.configurationFile=../dataScavenger/src/main/resources/logback.xml")
+    javaOptions += "-Dlogback.configurationFile=../dataScavenger/src/main/resources/logback.xml",
+    dockerfile in docker := {
+      val artifact: File = assembly.value
+      val artifactTargetPath = s"/opt/${artifact.name}"
+      val runJar = Seq(
+        "java",
+        "-jar",
+        "-Dlogback.configurationFile=/opt/conf/logback.xml",
+        artifactTargetPath)
+
+      new Dockerfile {
+        from("java:8-jre")
+        add(artifact, artifactTargetPath)
+        add(new File("./dataScavenger/src/main/resources/logback.xml"), "/opt/conf/logback.xml")
+        entryPoint(runJar: _*)
+      }
+    })
+  .enablePlugins(DockerPlugin)
