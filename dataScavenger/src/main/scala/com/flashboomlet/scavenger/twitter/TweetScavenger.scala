@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.flashboomlet.data.models.Entity
 import com.flashboomlet.data.models.PreprocessData
 import com.flashboomlet.data.models.FinalTweet
+import com.flashboomlet.data.models.TweetSocialData
 import com.flashboomlet.data.models.TwitterSearch
 import com.flashboomlet.db.MongoDatabaseDriver
 import com.flashboomlet.preproccessing.CountUtil.countContent
@@ -164,12 +165,22 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
         userID = tweet.user.get.id,
         name = tweet.user.get.name,
         screenName = tweet.user.get.screen_name,
-        favoriteCount = tweet.favorite_count,
+        socialDatas = Set(
+          TweetSocialData(
+            favoriteCount = tweet.favorite_count,
+            retweetCount = tweet.retweet_count,
+            fetchDate = DateUtil.getNowInMillis
+          )
+        ),
         country = tweet.place match {
-            case Some(g) => g.country
-            case None => "N/A"
+          case Some(g) => g.country
+          case None => "N/A"
         },
-        retweetCount = tweet.retweet_count,
+        parentTweetId = tweet.retweeted_status match {
+          case Some(t) => t.id
+          case None => 0
+        },
+        isRetweet = tweet.retweeted,
         metaDatas = Set(metaData),
         preprocessData = preprocessData
       )

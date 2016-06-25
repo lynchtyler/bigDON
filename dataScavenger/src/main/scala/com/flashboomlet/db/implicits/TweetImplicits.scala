@@ -3,7 +3,9 @@ package com.flashboomlet.db.implicits
 import com.flashboomlet.data.models.FinalTweet
 import com.flashboomlet.data.models.MetaData
 import com.flashboomlet.data.models.PreprocessData
+import com.flashboomlet.data.models.TweetSocialData
 import com.flashboomlet.db.MongoConstants
+import reactivemongo.bson.BSONBoolean
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
@@ -16,6 +18,7 @@ import reactivemongo.bson.BSONString
   */
 trait TweetImplicits
   extends MongoConstants
+  with TweetSocialDataImplicits
   with MetaDataImplicits
   with PreprocessDataImplicits {
 
@@ -31,9 +34,10 @@ trait TweetImplicits
         TwitterConstants.UserIDString -> BSONLong(tweet.userID),
         TwitterConstants.NameString -> BSONString(tweet.name),
         TwitterConstants.ScreenNameString -> BSONString(tweet.screenName),
-        TwitterConstants.FavoriteCountString -> BSONInteger(tweet.favoriteCount),
         TwitterConstants.CountryString -> BSONString(tweet.country),
-        TwitterConstants.RetweetCountString -> BSONLong(tweet.retweetCount),
+        TwitterConstants.ParentTweetIdString -> BSONLong(tweet.parentTweetId),
+        TwitterConstants.IsRetweetString -> BSONBoolean(tweet.isRetweet),
+        TwitterConstants.SocialDatasString -> tweet.socialDatas,
         GlobalConstants.MetaDatasString -> tweet.metaDatas,
         GlobalConstants.PreprocessDataString -> tweet.preprocessData
       )
@@ -51,11 +55,13 @@ trait TweetImplicits
       val userID = doc.getAs[Long](TwitterConstants.UserIDString).get
       val name = doc.getAs[String](TwitterConstants.NameString).get
       val screenName = doc.getAs[String](TwitterConstants.ScreenNameString).get
-      val favoriteCount = doc.getAs[Int](TwitterConstants.FavoriteCountString).get
       val country = doc.getAs[String](TwitterConstants.CountryString).get
-      val retweetCount = doc.getAs[Long](TwitterConstants.RetweetCountString).get
+      val parentTweetId = doc.getAs[Long](TwitterConstants.ParentTweetIdString).get
+      val isRetweet = doc.getAs[Boolean](TwitterConstants.IsRetweetString).get
+      val socialDatas = doc.getAs[Set[TweetSocialData]](TwitterConstants.SocialDatasString).get
       val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString).get
       val preprocessData = doc.getAs[PreprocessData](GlobalConstants.PreprocessDataString).get
+
 
       FinalTweet(
         tweetID = tweetID,
@@ -65,13 +71,13 @@ trait TweetImplicits
         userID = userID,
         name = name,
         screenName = screenName,
-        favoriteCount = favoriteCount,
         country = country,
-        retweetCount = retweetCount,
+        isRetweet = isRetweet,
+        parentTweetId = parentTweetId,
+        socialDatas = socialDatas,
         metaDatas = metaData,
         preprocessData = preprocessData
       )
-
     }
   }
 }

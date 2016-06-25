@@ -15,7 +15,8 @@
         "trumptrain",
         "republican",
         "election2016",
-        "election"
+        "election",
+        "candidate"
       ]
     },
     {
@@ -29,7 +30,10 @@
         "hfa",
         "hillaryforamerica",
         "hillaryclinton",
-        "democratic"
+        "democratic",
+        "election",
+        "election2016",
+        "candidate"
       ]
     }
   ]
