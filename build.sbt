@@ -36,7 +36,7 @@ lazy val dataScavenger = (project in file ("dataScavenger"))
   .settings(commonSettings: _*)
   .settings(
     name := "dataScavenger",
-    version := "0.0.0",
+    version := "0.1.0",
     javaOptions += "-Dlogback.configurationFile=../dataScavenger/src/main/resources/logback.xml",
     dockerfile in docker := {
       val artifact: File = assembly.value
