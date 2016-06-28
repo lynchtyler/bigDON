@@ -7,7 +7,7 @@ services:
     ports:
       -  "27017:27017"
     volumes:
-      - /srv/local/data:/data/db
+      - /srv/local/bigdon/data:/data/db
   sentiment:
     image: sentimentweb
     container_name: bigdon_sentimentweb
