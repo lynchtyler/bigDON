@@ -56,7 +56,7 @@ trait TweetImplicits
       val name = doc.getAs[String](TwitterConstants.NameString).get
       val screenName = doc.getAs[String](TwitterConstants.ScreenNameString).get
       val country = doc.getAs[String](TwitterConstants.CountryString).get
-      val parentTweetId = doc.getAs[Long](TwitterConstants.ParentTweetIdString).get
+      val parentTweetId = doc.getAs[Long](TwitterConstants.ParentTweetIdString)
       val isRetweet = doc.getAs[Boolean](TwitterConstants.IsRetweetString).get
       val socialDatas = doc.getAs[Set[TweetSocialData]](TwitterConstants.SocialDatasString).get
       val metaData = doc.getAs[Set[MetaData]](GlobalConstants.MetaDatasString).get
@@ -73,7 +73,7 @@ trait TweetImplicits
         screenName = screenName,
         country = country,
         isRetweet = isRetweet,
-        parentTweetId = parentTweetId,
+        parentTweetId = parentTweetId.getOrElse(0),
         socialDatas = socialDatas,
         metaDatas = metaData,
         preprocessData = preprocessData
