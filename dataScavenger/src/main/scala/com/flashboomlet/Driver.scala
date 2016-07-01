@@ -49,8 +49,11 @@ object Driver extends LazyLogging {
 
     databaseDriver.populateEntities(entities)
 
-    configureScheduler()
-
+//    configureScheduler()
+    databaseDriver.articleCount
+    databaseDriver.deleteNewYorkTimesArticles("Trump")
+    databaseDriver.deleteNewYorkTimesArticles("Clinton")
+    databaseDriver.articleCount
   }
 
   /**

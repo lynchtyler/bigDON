@@ -109,6 +109,28 @@ class MongoDatabaseDriver
     insert(article, newYorkTimesArticlesCollection)
   }
 
+  def articleCount: Unit = {
+    println(Await.result(
+      newYorkTimesArticlesCollection.count(),
+      Duration.Inf
+    ))
+  }
+
+  def deleteNewYorkTimesArticles(entity: String): Unit = {
+    val future = newYorkTimesArticlesCollection.remove(BSONDocument(
+      GlobalConstants.MetaDatasString ->
+        BSONDocument(GlobalConstants.ElemMatchString ->
+          BSONDocument(
+            MetaDataConstants.EntityLastNameString -> entity
+          )
+        )
+    )).onComplete{
+      case Success(s) => println("deleted article")
+
+      case Failure(e) => println("failed to delete article")
+    }
+  }
+
   /**
     * Adds a metadata to a nyt article
     *
