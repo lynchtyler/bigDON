@@ -53,7 +53,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
     */
   def scavenge(entities: Set[Entity]): Unit = {
    // entities foreach search terms foreach scavengeArticles(searchterms, today, today)
-
+   val yesterdatStringQuery = DateUtil.getNytYesterday
    val todayStringQuery = DateUtil.getNytToday
    entities.foreach { entity =>
      entity.searchTerms.foreach { term =>
@@ -62,7 +62,7 @@ class NewYorkTimesScavenger(apiKeys: NewYorkTimesApiKeys)(implicit val mapper: O
          scavengeArticles(
            query = term,
            entityLastName = entity.lastName,
-           beginDate = todayStringQuery,
+           beginDate = yesterdatStringQuery,
            endDate = todayStringQuery)
          logger.info(s"Successfully scavenged articles for ${entity.lastName} : $term")
        }.getOrElse(
