@@ -24,7 +24,7 @@ object DateUtil {
 
   def getNytInMillis(nytDate: String): Long = {
     val format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'", Locale.ENGLISH)
-    format.parse(nytDate).getTime
+    format.parse(nytDate).getTime - 21600000// subtract from GMT to local
   }
 
   def getNowInMillis: Long = new Date().getTime
@@ -34,5 +34,12 @@ object DateUtil {
     val simpleDateFormat = new SimpleDateFormat(NytQueryDateFormat)
     val calendar: Calendar = Calendar.getInstance()
     simpleDateFormat.format(calendar.getTime)
+  }
+
+  def getNytYesterday: String = {
+    val simpleDateFormat = new SimpleDateFormat(NytQueryDateFormat)
+    val calendar: Calendar = Calendar.getInstance()
+    calendar.setTimeInMillis(getNowInMillis - 86400000L)
+    simpleDateFormat.format(calendar.getTime) // subtract a day
   }
 }
