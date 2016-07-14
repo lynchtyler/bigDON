@@ -243,7 +243,7 @@ class MongoDatabaseDriver
     ))
     twitterSearchesCollection.update(selector, modifier).onComplete {
       case Success(result) => logger.info("successfully updated tweet search")
-      case Failure =>
+      case _ =>
         logger.error(s"failed to update tweet search ${twitterSearch.recentTwitterId}")
     }
   }
