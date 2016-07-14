@@ -241,7 +241,11 @@ class MongoDatabaseDriver
     val modifier = BSONDocument(GlobalConstants.SetString -> BSONDocument(
       TwitterSearchConstants.RecentTwitterIdString -> twitterSearch.recentTwitterId
     ))
-    twitterSearchesCollection.update(selector, modifier)
+    twitterSearchesCollection.update(selector, modifier).onComplete {
+      case Success(result) => logger.info("successfully updated tweet search")
+      case Failure =>
+        logger.error(s"failed to update tweet search ${twitterSearch.recentTwitterId}")
+    }
   }
 
   /**
