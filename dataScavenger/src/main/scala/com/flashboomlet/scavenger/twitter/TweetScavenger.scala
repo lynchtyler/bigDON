@@ -77,8 +77,9 @@ class TweetScavenger(implicit val mapper: ObjectMapper,
                 entityLastName = entity.lastName,
                 query = query)
             }
+            // This should work but doesn't
+            //db.updateTwitterSearch(TwitterSearch(query, entity.lastName, tweets.map(_.id).max))
           }
-          db.updateTwitterSearch(twitterSearch)
           logger.info(s"Successfully inserted tweets for ${entity.lastName}, $query")
         }.getOrElse(
           logger.error(s"Failed to fetch and inserts tweets for query: $query")
