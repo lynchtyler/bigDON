@@ -14,7 +14,9 @@ import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.BSONDateTime
 import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.BSONLong
 import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.BSONString
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -243,7 +245,7 @@ class MongoDatabaseDriver
     ))
     twitterSearchesCollection.update(selector, modifier).onComplete {
       case Success(result) => logger.info("successfully updated tweet search")
-      case Failure =>
+      case _ =>
         logger.error(s"failed to update tweet search ${twitterSearch.recentTwitterId}")
     }
   }
