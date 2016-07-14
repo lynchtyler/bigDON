@@ -5,7 +5,7 @@ services:
     image: com.flashboomlet/datascavenger
     container_name: bigdon_scavenger
     volumes:
-     - /srv/local/bigdon/logs/:/logs
+     - /media/ttlynch/bigDONData/bigdon/logs/:/logs
     networks:
       bigdon_net:
         ipv4_address: 172.16.238.30
@@ -17,7 +17,7 @@ services:
     image: mongo
     container_name: bigdon_mongo
     volumes:
-      - /srv/local/bigdon/data:/data/db
+      - /media/ttlynch/bigDONData/bigdon/data:/data/db
     networks:
       bigdon_net:
         ipv4_address: 172.16.238.20
